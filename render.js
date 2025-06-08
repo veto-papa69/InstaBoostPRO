@@ -1,48 +1,50 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+// Required modules
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { neon } = require('@neondatabase/serverless');
 
+// NeonDB connection string (apna actual connection string yaha daal)
+const sql = neon("YOUR_NEONDB_CONNECTION_URL");
+
+// Initialize Express app
 const app = express();
-
-// __dirname polyfill for ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Serve static files from dist
-app.use(express.static(path.join(__dirname, 'dist')));
-
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Test route
+app.get('/', (req, res) => {
+  res.send('InstaBoost Pro Server is live 🚀');
 });
 
-// Login route
-app.post('/api/auth/login', (req, res) => {
-  const { username, password } = req.body;
+// Example login POST route (adjust route and logic as per your frontend request)
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({ success: false, message: 'Username & password required.' });
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Missing fields' });
+    }
+
+    // NeonDB example query — update this with your actual table/logic
+    const result = await sql`SELECT * FROM users WHERE username = ${username}`;
+
+    if (result.length > 0 && result[0].password === password) {
+      res.json({ message: 'Login successful' });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
   }
-
-  if (username === 'admin' && password === 'admin123') {
-    return res.json({ success: true, message: 'Login successful.' });
-  } else {
-    return res.status(401).json({ success: false, message: 'Invalid credentials.' });
-  }
 });
 
-// Catch all for SPA
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
-
-const PORT = process.env.PORT || 10000;
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on 0.0.0.0:${PORT}`);
+// Start server
+app.listen(PORT, () => {
+  console.log(`InstaBoost Pro server running at http://localhost:${PORT}`);
 });
