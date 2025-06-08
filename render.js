@@ -429,7 +429,7 @@ app.post('/api/payments', async (req, res) => {
     }
 
     const payment = new Payment({
-      userId: user.uid,
+      userId: user.uid,  // Store UID, not MongoDB _id
       amount,
       utrNumber,
       paymentMethod,
@@ -504,13 +504,15 @@ app.post('/api/telegram/webhook', async (req, res) => {
           await payment.save();
           console.log("📝 Payment status updated to Approved");
           
-          // Find user and add funds to wallet
+          // Find user by UID (not MongoDB _id) and add funds to wallet
           const user = await User.findOne({ uid: payment.userId });
           if (user) {
             const paymentAmount = payment.amount;
             user.walletBalance += paymentAmount;
             await user.save();
             console.log(`💳 Funds added: ₹${paymentAmount} to user ${user.uid}. New balance: ₹${user.walletBalance}`);
+          } else {
+            console.log("❌ User not found for UID:", payment.userId);
           }
           
           // Answer callback query with success message
