@@ -15,6 +15,7 @@ interface Payment {
 
 // Track processed payments globally to avoid re-notifications
 const processedPayments = new Set<string>();
+const sessionProcessedPayments = new Set<string>();
 
 export function usePaymentStatus() {
   const { toast } = useToast();
@@ -28,10 +29,14 @@ export function usePaymentStatus() {
   });
 
   useEffect(() => {
+    if (!payments.length) return;
+
     payments.forEach(payment => {
       const paymentKey = `${payment.id}-${payment.status}`;
+      const sessionKey = `${payment.id}-session`;
       
-      if (processedPayments.has(paymentKey)) return;
+      // Skip if already processed globally or in this session
+      if (processedPayments.has(paymentKey) || sessionProcessedPayments.has(sessionKey)) return;
       
       if (payment.status === "Approved") {
         toast({
@@ -41,6 +46,7 @@ export function usePaymentStatus() {
         // Refresh user data to update wallet balance
         queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         processedPayments.add(paymentKey);
+        sessionProcessedPayments.add(sessionKey);
       } else if (payment.status === "Declined") {
         toast({
           title: "Payment Failed",
@@ -48,9 +54,22 @@ export function usePaymentStatus() {
           variant: "destructive",
         });
         processedPayments.add(paymentKey);
+        sessionProcessedPayments.add(sessionKey);
+      }
+      
+      // For pending payments, just mark them as seen to avoid future duplicate notifications
+      if (payment.status === "Pending") {
+        sessionProcessedPayments.add(sessionKey);
       }
     });
   }, [payments, toast, queryClient]);
+
+  // Clear session processed payments when authentication state changes
+  useEffect(() => {
+    if (!isAuthenticated) {
+      sessionProcessedPayments.clear();
+    }
+  }, [isAuthenticated]);
 
   return { payments };
 }
