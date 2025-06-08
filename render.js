@@ -35,6 +35,56 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// Authentication routes
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    // Basic validation
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password required' });
+    }
+
+    // For demo purposes - replace with real authentication
+    if (username === 'demo' && password === 'demo123') {
+      res.json({ 
+        success: true, 
+        user: { id: 1, username: 'demo', balance: 0 },
+        message: 'Login successful'
+      });
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: 'All fields required' });
+    }
+
+    // For demo purposes - replace with real user creation
+    res.json({ 
+      success: true, 
+      user: { id: Date.now(), username, email, balance: 0 },
+      message: 'Registration successful'
+    });
+  } catch (error) {
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Registration failed' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
 // Basic API routes
 app.get('/api/services', (req, res) => {
   const services = [
