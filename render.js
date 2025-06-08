@@ -482,109 +482,164 @@ app.post('/api/telegram/webhook', async (req, res) => {
   try {
     console.log("📞 Telegram webhook received:", JSON.stringify(req.body, null, 2));
     
-    const { callback_query } = req.body;
+    const { callback_query, message } = req.body;
     
+    // Handle callback queries (button clicks)
     if (callback_query && callback_query.data) {
       const data = callback_query.data;
       const botToken = process.env.TELEGRAM_BOT_TOKEN || "7275717734:AAE6bq0Mdypn_wQL6F1wpphzEtLAco3_B3Y";
       
       console.log("🔘 Button clicked:", data);
+      console.log("👤 Clicked by user:", callback_query.from.username || callback_query.from.first_name);
       
       if (data.startsWith("accept_payment_")) {
         const paymentId = data.replace("accept_payment_", "");
         console.log("✅ Processing payment acceptance for ID:", paymentId);
         
-        const payment = await Payment.findById(paymentId);
-        
-        if (payment) {
-          console.log("💰 Payment found:", payment);
+        try {
+          const payment = await Payment.findById(paymentId);
           
-          // Update payment status to approved
-          payment.status = "Approved";
-          await payment.save();
-          console.log("📝 Payment status updated to Approved");
-          
-          // Find user by UID (not MongoDB _id) and add funds to wallet
-          const user = await User.findOne({ uid: payment.userId });
-          if (user) {
-            const paymentAmount = payment.amount;
-            user.walletBalance += paymentAmount;
-            await user.save();
-            console.log(`💳 Funds added: ₹${paymentAmount} to user ${user.uid}. New balance: ₹${user.walletBalance}`);
+          if (payment && payment.status === "Pending") {
+            console.log("💰 Payment found:", payment);
+            
+            // Update payment status to approved
+            payment.status = "Approved";
+            await payment.save();
+            console.log("📝 Payment status updated to Approved");
+            
+            // Find user by UID and add funds to wallet
+            const user = await User.findOne({ uid: payment.userId });
+            if (user) {
+              const paymentAmount = payment.amount;
+              const oldBalance = user.walletBalance;
+              user.walletBalance += paymentAmount;
+              await user.save();
+              console.log(`💳 Funds added: ₹${paymentAmount} to user ${user.uid}`);
+              console.log(`💰 Balance updated: ₹${oldBalance} → ₹${user.walletBalance}`);
+              
+              // Answer callback query with success message
+              await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  callback_query_id: callback_query.id,
+                  text: `✅ Payment approved! ₹${paymentAmount} added to ${user.instagramUsername}'s wallet. New balance: ₹${user.walletBalance}`,
+                  show_alert: true
+                })
+              });
+
+              // Edit the original message
+              const updatedText = callback_query.message.text + 
+                `\n\n✅ **APPROVED** by @${callback_query.from.username || callback_query.from.first_name}` +
+                `\n💰 ₹${paymentAmount} added to wallet` +
+                `\n💳 New balance: ₹${user.walletBalance}`;
+                
+              await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: callback_query.message.chat.id,
+                  message_id: callback_query.message.message_id,
+                  text: updatedText,
+                  parse_mode: 'Markdown'
+                })
+              });
+            } else {
+              console.log("❌ User not found for UID:", payment.userId);
+              await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  callback_query_id: callback_query.id,
+                  text: "❌ Error: User not found!",
+                  show_alert: true
+                })
+              });
+            }
           } else {
-            console.log("❌ User not found for UID:", payment.userId);
-          }
-          
-          // Answer callback query with success message
-          if (botToken) {
+            console.log("❌ Payment not found or already processed:", paymentId);
             await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 callback_query_id: callback_query.id,
-                text: `✅ Payment approved! ₹${payment.amount} added to wallet.`,
+                text: "❌ Payment not found or already processed!",
+                show_alert: true
+              })
+            });
+          }
+        } catch (dbError) {
+          console.error("❌ Database error:", dbError);
+          await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              callback_query_id: callback_query.id,
+              text: "❌ Database error occurred!",
+              show_alert: true
+            })
+          });
+        }
+        
+      } else if (data.startsWith("decline_payment_")) {
+        const paymentId = data.replace("decline_payment_", "");
+        console.log("❌ Processing payment decline for ID:", paymentId);
+        
+        try {
+          const payment = await Payment.findById(paymentId);
+          if (payment && payment.status === "Pending") {
+            payment.status = "Declined";
+            await payment.save();
+            console.log("📝 Payment status updated to Declined");
+            
+            // Answer callback query
+            await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                callback_query_id: callback_query.id,
+                text: "❌ Payment declined successfully!",
                 show_alert: true
               })
             });
 
-            // Edit the original message to show it's been processed
+            // Edit the original message
+            const updatedText = callback_query.message.text + 
+              `\n\n❌ **DECLINED** by @${callback_query.from.username || callback_query.from.first_name}`;
+              
             await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 chat_id: callback_query.message.chat.id,
                 message_id: callback_query.message.message_id,
-                text: callback_query.message.text + "\n\n✅ **APPROVED** - Funds added to wallet",
+                text: updatedText,
                 parse_mode: 'Markdown'
               })
             });
+          } else {
+            await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                callback_query_id: callback_query.id,
+                text: "❌ Payment not found or already processed!",
+                show_alert: true
+              })
+            });
           }
-        } else {
-          console.log("❌ Payment not found for ID:", paymentId);
-        }
-      } else if (data.startsWith("decline_payment_")) {
-        const paymentId = data.replace("decline_payment_", "");
-        console.log("❌ Processing payment decline for ID:", paymentId);
-        
-        // Update payment status to declined
-        const payment = await Payment.findById(paymentId);
-        if (payment) {
-          payment.status = "Declined";
-          await payment.save();
-          console.log("📝 Payment status updated to Declined");
-        }
-        
-        // Answer callback query with decline message
-        if (botToken) {
-          await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              callback_query_id: callback_query.id,
-              text: "❌ Payment declined and marked as failed.",
-              show_alert: true
-            })
-          });
-
-          // Edit the original message to show it's been processed
-          await fetch(`https://api.telegram.org/bot${botToken}/editMessageText`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: callback_query.message.chat.id,
-              message_id: callback_query.message.message_id,
-              text: callback_query.message.text + "\n\n❌ **DECLINED** - Payment marked as failed",
-              parse_mode: 'Markdown'
-            })
-          });
+        } catch (dbError) {
+          console.error("❌ Database error:", dbError);
         }
       }
     }
     
-    res.json({ success: true });
+    // Always respond with success to Telegram
+    res.status(200).json({ ok: true });
   } catch (error) {
     console.error("❌ Telegram webhook error:", error);
-    res.status(500).json({ error: "Webhook error" });
+    console.error("Error stack:", error.stack);
+    res.status(200).json({ ok: true }); // Still return 200 to Telegram
   }
 });
 
@@ -642,13 +697,60 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
+// Setup Telegram webhook
+async function setupTelegramWebhook() {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN || "7275717734:AAE6bq0Mdypn_wQL6F1wpphzEtLAco3_B3Y";
+  
+  if (!botToken) {
+    console.log('⚠️ Telegram bot token not configured');
+    return;
+  }
+
+  try {
+    // Get webhook URL - for Render deployment
+    let webhookUrl = '';
+    
+    if (process.env.RENDER_EXTERNAL_URL) {
+      webhookUrl = `${process.env.RENDER_EXTERNAL_URL}/api/telegram/webhook`;
+    } else {
+      // Fallback for development
+      webhookUrl = `https://b020e990-2a37-47c1-8928-127ba5c07e4c-00-1yipndxvbknh9.pike.replit.dev/api/telegram/webhook`;
+    }
+    
+    console.log('🔗 Setting webhook URL:', webhookUrl);
+    
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: webhookUrl,
+        allowed_updates: ['callback_query', 'message']
+      })
+    });
+
+    const result = await response.json();
+    if (response.ok && result.ok) {
+      console.log('✅ Telegram webhook configured successfully');
+    } else {
+      console.log('⚠️ Telegram webhook setup failed:', result);
+    }
+  } catch (error) {
+    console.log('⚠️ Telegram webhook setup failed:', error);
+  }
+}
+
 // Connect to database and start server
-connectDB().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
+connectDB().then(async () => {
+  app.listen(PORT, '0.0.0.0', async () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📡 Environment: ${process.env.NODE_ENV || 'production'}`);
     console.log(`📱 Telegram Bot Token: ${process.env.TELEGRAM_BOT_TOKEN ? 'Configured' : 'Using Default'}`);
     console.log(`💬 Telegram Chat ID: ${process.env.TELEGRAM_CHAT_ID || 'Using Default'}`);
+    
+    // Setup webhook after server starts
+    setTimeout(async () => {
+      await setupTelegramWebhook();
+    }, 2000);
   });
 });
 
