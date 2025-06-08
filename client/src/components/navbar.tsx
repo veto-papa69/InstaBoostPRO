@@ -45,14 +45,14 @@ export function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden lg:flex items-center space-x-6">
               {navLinks.map((link) => {
                 if (link.requireAuth && !isAuthenticated) {
                   return (
                     <button
                       key={link.href}
                       onClick={() => setIsAuthModalOpen(true)}
-                      className="nav-link hover:text-gold"
+                      className="nav-link hover:text-gold text-sm font-medium transition-colors duration-200"
                     >
                       {link.label}
                     </button>
@@ -62,8 +62,8 @@ export function Navbar() {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`nav-link ${
-                      location === link.href ? "text-gold" : ""
+                    className={`nav-link text-sm font-medium transition-colors duration-200 ${
+                      location === link.href ? "text-gold" : "hover:text-gold"
                     }`}
                   >
                     {link.label}
@@ -73,44 +73,44 @@ export function Navbar() {
             </div>
 
             {/* Auth Section */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-3">
               {isAuthenticated && user ? (
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
+                <div className="flex items-center space-x-3">
+                  <div className="text-right px-3 py-1 bg-charcoal/30 rounded-lg border border-gold/20">
                     <div className="text-xs text-cream/70">Balance</div>
-                    <div className="text-gold font-semibold">
+                    <div className="text-gold font-semibold text-sm">
                       {formatCurrency(user.walletBalance)}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right px-3 py-1 bg-charcoal/30 rounded-lg border border-gold/20">
                     <div className="text-xs text-cream/70">UID</div>
-                    <div className="text-cream text-sm font-mono">{user.uid}</div>
+                    <div className="text-cream text-xs font-mono">{user.uid}</div>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleLogout}
-                    className="text-cream/70 hover:text-gold"
+                    className="text-cream/70 hover:text-gold hover:bg-gold/10 transition-all duration-200 ml-2"
                   >
                     Logout
                   </Button>
                 </div>
               ) : (
-                <>
+                <div className="flex items-center space-x-3">
                   <Button
                     variant="outline"
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="btn-outline"
+                    className="btn-outline text-sm"
                   >
                     Login
                   </Button>
                   <Button
                     onClick={() => setIsAuthModalOpen(true)}
-                    className="btn-primary"
+                    className="btn-primary text-sm"
                   >
                     Get Started
                   </Button>
-                </>
+                </div>
               )}
             </div>
 
