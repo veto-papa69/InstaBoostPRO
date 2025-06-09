@@ -45,7 +45,15 @@ export default function Home() {
 
   return (
     <>
-      <div className="pt-28 pb-16">
+      {/* Animated Announcement Banner */}
+      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-3 overflow-hidden relative">
+        <div className="animate-scroll whitespace-nowrap">
+          <span className="text-lg font-bold">
+            🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
+          </span>
+        </div>
+      </div>
+      <div className="pt-24 pb-16">
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
@@ -66,7 +74,7 @@ export default function Home() {
                 </h1>
                 
                 <p className="text-xl md:text-2xl text-cream/80 mb-8 max-w-3xl mx-auto">
-                  Get premium followers, likes, views, and comments at unbeatable prices starting from ₹1/1000
+                  Get premium followers, likes, views, and comments at competitive prices starting from ₹11/1000
                 </p>
 
                 {/* Welcome Bonus Card */}
@@ -118,7 +126,7 @@ export default function Home() {
                   <i className="fas fa-users text-gold text-2xl"></i>
                 </div>
                 <h3 className="text-xl font-bold text-gold mb-2">Real Followers</h3>
-                <p className="text-cream/80">High-quality Indian and international followers starting from ₹4/1000</p>
+                <p className="text-cream/80">High-quality Indian and international followers starting from ₹24/1000</p>
               </div>
 
               <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
@@ -126,7 +134,7 @@ export default function Home() {
                   <i className="fas fa-heart text-gold text-2xl"></i>
                 </div>
                 <h3 className="text-xl font-bold text-gold mb-2">Instant Likes</h3>
-                <p className="text-cream/80">Boost engagement with authentic likes starting from ₹2/1000</p>
+                <p className="text-cream/80">Boost engagement with authentic likes starting from ₹12/1000</p>
               </div>
 
               <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
@@ -134,7 +142,7 @@ export default function Home() {
                   <i className="fas fa-eye text-gold text-2xl"></i>
                 </div>
                 <h3 className="text-xl font-bold text-gold mb-2">Video Views</h3>
-                <p className="text-cream/80">Increase video reach with premium views starting from ₹1/1000</p>
+                <p className="text-cream/80">Increase video reach with premium views starting from ₹11/1000</p>
               </div>
 
               <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
@@ -142,7 +150,7 @@ export default function Home() {
                   <i className="fas fa-comments text-gold text-2xl"></i>
                 </div>
                 <h3 className="text-xl font-bold text-gold mb-2">Comments</h3>
-                <p className="text-cream/80">Drive conversations with comments starting from ₹8/1000</p>
+                <p className="text-cream/80">Drive conversations with comments starting from ₹18/1000</p>
               </div>
             </div>
 
