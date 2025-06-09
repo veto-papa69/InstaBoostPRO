@@ -55,12 +55,27 @@ export function ServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
   const [priceInputValue, setPriceInputValue] = useState("");
   const [quantityInputValue, setQuantityInputValue] = useState("");
 
+  const calculatePrice = (quantity: number) => {
+    if (!service) return 0;
+    const rate = parseFloat(service.rate);
+    return (quantity * rate) / 1000;
+  };
+
+  const getMinimumQuantityForPrice = () => {
+    if (!service) return 0;
+    const rate = parseFloat(service.rate);
+    return Math.ceil((20 * 1000) / rate); // Minimum ₹20 order
+  };
+
+  const minQuantityForPrice = getMinimumQuantityForPrice();
+  const effectiveMinOrder = Math.max(service?.minOrder || 0, minQuantityForPrice);
+
   const form = useForm<OrderForm>({
     resolver: zodResolver(orderSchema),
     defaultValues: {
       instagramUsername: "",
       price: 0,
-      quantity: 0,
+      quantity: effectiveMinOrder,
     },
   });
 
@@ -123,10 +138,10 @@ export function ServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
   const onSubmit = async (data: OrderForm) => {
     if (!service) return;
 
-    if (data.quantity < service.minOrder || data.quantity > service.maxOrder) {
+    if (data.quantity < effectiveMinOrder || data.quantity > service.maxOrder) {
       toast({
         title: "Invalid Quantity",
-        description: `Quantity must be between ${service.minOrder} and ${service.maxOrder.toLocaleString()}`,
+        description: `Quantity must be between ${effectiveMinOrder} and ${service.maxOrder.toLocaleString()}`,
         variant: "destructive",
       });
       return;
@@ -183,7 +198,7 @@ export function ServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
             </div>
             <div>
               <span className="text-cream/60">Min:</span>
-              <span className="text-cream ml-2">{service.minOrder.toLocaleString()}</span>
+              <span className="text-cream ml-2">{effectiveMinOrder.toLocaleString()}</span>
             </div>
             <div>
               <span className="text-cream/60">Max:</span>
@@ -244,6 +259,15 @@ export function ServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
                 </FormItem>
               </div>
 
+              {(parseFloat(priceInputValue) || 0) < 20 && priceInputValue !== "" && (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-4">
+                  <p className="text-red-400 text-sm font-medium">
+                    <i className="fas fa-exclamation-triangle mr-2"></i>
+                    Minimum order amount is ₹20. Please increase the quantity.
+                  </p>
+                </div>
+              )}
+
               <div className="bg-gold/10 border border-gold/30 rounded-lg p-4">
                 <h4 className="text-gold font-semibold mb-2">Order Summary</h4>
                 <div className="flex justify-between text-cream/80 mb-1">
@@ -275,7 +299,7 @@ export function ServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={createOrder.isPending}
+                  disabled={createOrder.isPending || (parseFloat(priceInputValue) || 0) < 20}
                   className="flex-1 btn-primary"
                 >
                   {createOrder.isPending ? (
