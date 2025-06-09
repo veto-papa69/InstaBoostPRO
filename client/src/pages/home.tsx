@@ -46,14 +46,14 @@ export default function Home() {
   return (
     <>
       {/* Animated Announcement Banner */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-3 overflow-hidden relative">
-        <div className="animate-scroll whitespace-nowrap">
-          <span className="text-lg font-bold">
-            🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
+      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 announcement-banner fixed top-0 left-0 right-0 z-50 shadow-lg">
+        <div className="animate-scroll">
+          <span className="text-lg font-bold inline-block pr-20">
+            🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
           </span>
         </div>
       </div>
-      <div className="pt-24 pb-16">
+      <div className="pt-32 pb-16">
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
