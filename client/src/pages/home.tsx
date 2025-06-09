@@ -46,10 +46,10 @@ export default function Home() {
   return (
     <>
       {/* Animated Announcement Banner */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 announcement-banner fixed top-0 left-0 right-0 z-50 shadow-lg">
+      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 announcement-banner fixed top-0 left-0 right-0 z-30 shadow-lg">
         <div className="animate-scroll">
           <span className="text-lg font-bold inline-block pr-20">
-            🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
+            🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
           </span>
         </div>
       </div>
