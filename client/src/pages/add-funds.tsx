@@ -46,7 +46,7 @@ export default function AddFunds() {
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
-      amount: 30,
+      amount: "",
       paymentMethod: "",
       utrNumber: "",
     },
