@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/select";
 
 const paymentSchema = z.object({
-  amount: z.number().min(10, "Minimum amount is ₹10"),
+  amount: z.number().min(30, "Minimum amount is ₹30"),
   paymentMethod: z.string().min(1, "Payment method is required"),
   utrNumber: z.string().min(1, "UTR number is required"),
 });
@@ -112,9 +112,9 @@ export default function AddFunds() {
                       <Input
                         {...field}
                         type="number"
-                        min="10"
+                        min="30"
                         step="0.01"
-                        placeholder="Enter amount"
+                        placeholder="Enter amount (minimum ₹30)"
                         className="bg-charcoal-dark border-gold/20 text-cream focus:border-gold"
                         onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       />
