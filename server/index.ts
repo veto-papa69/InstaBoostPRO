@@ -55,5 +55,7 @@ app.use((req, res, next) => {
   });
 
   // Handle SIGTERM gracefully (Render sends this when stopping)
-  process.on('SIGTERM', () => {
-    console.log('📦 Received SIGTERM
+process.on('SIGTERM', () => {
+  console.log('📦 Received SIGTERM signal, shutting down gracefully...');
+  process.exit(0);
+});
