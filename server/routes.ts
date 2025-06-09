@@ -71,7 +71,7 @@ const orderSchema = z.object({
 });
 
 const paymentSchema = z.object({
-  amount: z.number().min(1),
+  amount: z.number().min(30),
   utrNumber: z.string().min(1),
   paymentMethod: z.string().min(1),
 });
