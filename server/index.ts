@@ -1,97 +1,100 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { updateServicePrices } from "./update-service-prices";
 import "./production-config";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Core Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// API Logger Middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined;
+  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
-  const originalJson = res.json;
-  res.json = function (body: any) {
-    capturedJsonResponse = body;
-    return originalJson.call(this, body);
+  const originalResJson = res.json;
+  res.json = function (bodyJson, ...args) {
+    capturedJsonResponse = bodyJson;
+    return originalResJson.apply(res, [bodyJson, ...args]);
   };
 
   res.on("finish", () => {
-    if (!path.startsWith("/api")) return;
-
     const duration = Date.now() - start;
-    let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+    if (path.startsWith("/api")) {
+      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+      if (capturedJsonResponse) {
+        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      }
 
-    if (capturedJsonResponse) {
-      logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+      log(logLine);
     }
-
-    if (logLine.length > 80) logLine = logLine.slice(0, 79) + "…";
-    log(logLine);
   });
 
   next();
 });
 
-// Setup async app lifecycle
-async function bootstrap() {
-  try {
-    // Hook into service price updater if needed
-    await updateServicePrices(); // ensure it's an async function
+(async () => {
+  // Add graceful error handling for unhandled exceptions
+  process.on('uncaughtException', (err) => {
+    console.error('❌ Uncaught Exception:', err);
+    if (process.env.NODE_ENV === 'production') {
+      console.error('🔄 Attempting to continue in production...');
+    }
+  });
 
-    // Static file serving (e.g. from dist/)
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    if (process.env.NODE_ENV === 'production') {
+      console.error('🔄 Attempting to continue in production...');
+    }
+  });
+
+  // Handle SIGTERM gracefully (Render sends this when stopping)
+  process.on('SIGTERM', () => {
+    console.log('📦 Received SIGTERM signal, shutting down gracefully...');
+    process.exit(0);
+  });
+
+  // Handle SIGINT gracefully (Ctrl+C)
+  process.on('SIGINT', () => {
+    console.log('📦 Received SIGINT signal, shutting down gracefully...');
+    process.exit(0);
+  });
+
+  const server = await registerRoutes(app);
+
+  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+    console.error('Express error handler:', err);
+    const status = err.status || err.statusCode || 500;
+    const message = err.message || "Internal Server Error";
+
+    res.status(status).json({ message });
+    // Don't throw - just log and continue
+  });
+
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
     serveStatic(app);
+  }
 
-    // API + Page Routes
-    registerRoutes(app);
-
-    // Vite (for dev mode)
-    await setupVite(app);
-
-    // Start Server
-    const server = app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-    });
-
-    // Graceful Shutdown
-    const shutdown = () => {
-      console.log("📦 Received shutdown signal. Closing server...");
-      server.close(() => {
-        console.log("🛑 Server closed. Exiting process.");
-        process.exit(0);
-      });
-    };
-
-    process.on("SIGTERM", shutdown);
-    process.on("SIGINT", shutdown); // CTRL+C
-
-  } catch (err) {
-    console.error("❌ Failed to start server:", err);
+  // Use port 5000 for development
+  const port = 5000;
+  const host = '0.0.0.0';
+  
+  server.listen(port, host, () => {
+    console.log(`🚀 Server running on ${host}:${port}`);
+    console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🌐 Server listening on port ${port}`);
+  }).on('error', (err) => {
+    console.error('❌ Server failed to start:', err);
     process.exit(1);
-  }
-}
-
-// Global Error Handlers
-process.on("uncaughtException", (err) => {
-  console.error("❌ Uncaught Exception:", err);
-  if (process.env.NODE_ENV === "production") {
-    console.error("🔄 Continuing despite uncaught exception...");
-  }
-});
-
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("❌ Unhandled Rejection at:", promise, "reason:", reason);
-  if (process.env.NODE_ENV === "production") {
-    console.error("🔄 Continuing despite unhandled rejection...");
-  }
-});
-
-// Start everything
-bootstrap();
+  });
+})();
