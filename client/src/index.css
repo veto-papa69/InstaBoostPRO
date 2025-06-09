@@ -4,6 +4,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Announcement Banner Animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
 :root {
   /* Exact theme colors */
   --main-bg: #0e1d18;
@@ -103,6 +117,19 @@
   
   .nav-link {
     @apply text-cream hover:text-gold transition-colors duration-300 font-medium;
+  }
+  
+  .animate-scroll {
+    animation: scroll 15s linear infinite;
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
   }
 }
 
