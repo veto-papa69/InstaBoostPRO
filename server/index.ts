@@ -1,100 +1,39 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import "./production-config";
+import { MongoClient } from 'mongodb';
 
-const app = express();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  'mongodb+srv://instaboost_user:uX1YzKjiOETNhyYj@cluster0.tolxjiz.mongodb.net/instaboost?retryWrites=true&w=majority&appName=Cluster0';
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+export async function updateServicePrices() {
+  const client = new MongoClient(MONGODB_URI);
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+  try {
+    await client.connect();
+    console.log('📦 Connected to MongoDB');
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
+    const db = client.db('instaboost');
+    const services = db.collection('services');
 
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
+    const followersUpdate = await services.updateMany(
+      { category: { $regex: /followers/i } },
+      { $inc: { rate: 20 } }
+    );
+    console.log(`✅ Updated ${followersUpdate.modifiedCount} followers services`);
 
-      log(logLine);
-    }
-  });
+    const othersUpdate = await services.updateMany(
+      { category: { $regex: /(likes|comments|views)/i } },
+      { $inc: { rate: 10 } }
+    );
+    console.log(`✅ Updated ${othersUpdate.modifiedCount} likes/comments/views services`);
 
-  next();
-});
-
-(async () => {
-  // Add graceful error handling for unhandled exceptions
-  process.on('uncaughtException', (err) => {
-    console.error('❌ Uncaught Exception:', err);
-    if (process.env.NODE_ENV === 'production') {
-      console.error('🔄 Attempting to continue in production...');
-    }
-  });
-
-  process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-    if (process.env.NODE_ENV === 'production') {
-      console.error('🔄 Attempting to continue in production...');
-    }
-  });
-
-  // Handle SIGTERM gracefully (Render sends this when stopping)
-  process.on('SIGTERM', () => {
-    console.log('📦 Received SIGTERM signal, shutting down gracefully...');
-    process.exit(0);
-  });
-
-  // Handle SIGINT gracefully (Ctrl+C)
-  process.on('SIGINT', () => {
-    console.log('📦 Received SIGINT signal, shutting down gracefully...');
-    process.exit(0);
-  });
-
-  const server = await registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    console.error('Express error handler:', err);
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    // Don't throw - just log and continue
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    const updated = await services.find({}).toArray();
+    console.log('📊 Updated Services:\n');
+    updated.forEach((service) =>
+      console.log(`${service.name} (${service.category}) → ₹${service.rate}`)
+    );
+  } catch (err) {
+    console.error('❌ Error updating service prices:', err);
+  } finally {
+    await client.close();
   }
-
-  // Use port 5000 for development
-  const port = 5000;
-  const host = '0.0.0.0';
-  
-  server.listen(port, host, () => {
-    console.log(`🚀 Server running on ${host}:${port}`);
-    console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🌐 Server listening on port ${port}`);
-  }).on('error', (err) => {
-    console.error('❌ Server failed to start:', err);
-    process.exit(1);
-  });
-})();
+}
