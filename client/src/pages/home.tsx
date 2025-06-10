@@ -47,7 +47,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-main-bg">
       {/* Announcement Banner */}
       <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 text-white py-3 shadow-lg border-b-2 border-yellow-400 overflow-hidden">
         <div className="animate-scroll">
@@ -62,42 +62,42 @@ export default function Home() {
         {/* Hero Section */}
         <section className="max-w-6xl mx-auto mb-16">
           <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Welcome to <span className="text-blue-600">InstaBoost</span>
+            <h1 className="text-5xl font-bold text-primary-text mb-6">
+              Welcome to <span className="text-gold">InstaBoost</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-text max-w-2xl mx-auto">
               Professional Instagram Growth Services - Boost your social media presence with our premium services
             </p>
           </div>
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="text-center bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardContent className="pt-6">
-                <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">50K+</div>
-                <p className="text-gray-600">Happy Customers</p>
+                <Users className="h-8 w-8 text-gold mx-auto mb-2" />
+                <div className="text-2xl font-bold text-primary-text">50K+</div>
+                <p className="text-muted-text">Happy Customers</p>
               </CardContent>
             </Card>
-            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="text-center bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardContent className="pt-6">
-                <Sparkles className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">14</div>
-                <p className="text-gray-600">Premium Services</p>
+                <Sparkles className="h-8 w-8 text-success-green mx-auto mb-2" />
+                <div className="text-2xl font-bold text-primary-text">14</div>
+                <p className="text-muted-text">Premium Services</p>
               </CardContent>
             </Card>
-            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="text-center bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardContent className="pt-6">
-                <Clock className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">24/7</div>
-                <p className="text-gray-600">Fast Delivery</p>
+                <Clock className="h-8 w-8 text-gold mx-auto mb-2" />
+                <div className="text-2xl font-bold text-primary-text">24/7</div>
+                <p className="text-muted-text">Fast Delivery</p>
               </CardContent>
             </Card>
-            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="text-center bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardContent className="pt-6">
-                <Shield className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-gray-900">100%</div>
-                <p className="text-gray-600">Secure & Safe</p>
+                <Shield className="h-8 w-8 text-error-red mx-auto mb-2" />
+                <div className="text-2xl font-bold text-primary-text">100%</div>
+                <p className="text-muted-text">Secure & Safe</p>
               </CardContent>
             </Card>
           </div>
@@ -106,52 +106,52 @@ export default function Home() {
         {/* Features Section */}
         <section className="max-w-6xl mx-auto mb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-blue-600">
+                <CardTitle className="flex items-center gap-2 text-gold">
                   <Users className="h-5 w-5" />
                   Instagram Followers
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-muted-text">
                   Get real, active followers from India, USA, and worldwide
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-text">
                   High-quality followers that engage with your content and help grow your presence organically.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-600">
+                <CardTitle className="flex items-center gap-2 text-success-green">
                   <Sparkles className="h-5 w-5" />
                   Instagram Likes
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-muted-text">
                   Boost your posts with authentic likes from real accounts
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-text">
                   Increase engagement on your posts with likes from real, active Instagram users.
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-card-bg shadow-lg hover:shadow-xl transition-shadow border border-gold/20">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-purple-600">
+                <CardTitle className="flex items-center gap-2 text-gold">
                   <Clock className="h-5 w-5" />
                   Fast Delivery
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-muted-text">
                   Quick processing and delivery of all services
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-muted-text">
                   Get your orders processed and delivered within minutes of placing them.
                 </p>
               </CardContent>
@@ -161,25 +161,28 @@ export default function Home() {
 
         {/* CTA Section */}
         <section className="max-w-4xl mx-auto text-center">
-          <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl">
+          <Card className="bg-gradient-to-r from-gold to-tan text-charcoal-dark shadow-2xl border border-gold">
             <CardContent className="pt-8 pb-8">
-              <h2 className="text-3xl font-bold mb-4">
+              <h2 className="text-3xl font-bold mb-4 text-charcoal-dark">
                 Ready to Grow Your Instagram?
               </h2>
-              <p className="text-xl mb-6 text-blue-100">
+              <p className="text-xl mb-6 text-charcoal-dark/80">
                 Join thousands of satisfied customers and boost your social media presence today
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8"
-                >
-                  View Services
-                </Button>
+                <Link to="/services">
+                  <Button
+                    size="lg"
+                    className="bg-charcoal-dark text-cream hover:bg-charcoal font-semibold px-8"
+                  >
+                    View Services
+                  </Button>
+                </Link>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8"
+                  className="border-charcoal-dark text-charcoal-dark hover:bg-charcoal-dark hover:text-cream font-semibold px-8"
+                  onClick={handleClaimBonus}
                 >
                   Get Started
                 </Button>
