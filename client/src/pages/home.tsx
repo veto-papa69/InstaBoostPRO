@@ -1,8 +1,11 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import React from 'react';
 import { useAuth, useClaimBonus } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Sparkles, Shield, Clock, Users } from 'lucide-react';
+import { useState } from "react";
+import { Link } from "wouter";
 import { AuthModal } from "@/components/auth-modal";
 
 export default function Home() {
@@ -44,146 +47,156 @@ export default function Home() {
   };
 
   return (
-    <>
-      {/* Animated Announcement Banner */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 announcement-banner fixed top-0 left-0 right-0 z-30 shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      {/* Announcement Banner */}
+      <div className="bg-gradient-to-r from-red-600 via-orange-600 to-red-600 text-white py-3 shadow-lg border-b-2 border-yellow-400 overflow-hidden">
         <div className="animate-scroll">
-          <span className="text-lg font-bold inline-block pr-20">
-            🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
+          <span className="text-lg font-bold inline-block pr-20 text-yellow-100">
+            🚨 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🚨 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🚨 EID FESTIVAL EVENT ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🚨
           </span>
         </div>
       </div>
-      <div className="pt-32 pb-16">
+
+      {/* Main Content */}
+      <div className="pt-8 pb-16 px-4">
         {/* Hero Section */}
-        <section className="px-4 mb-16">
-          <div className="max-w-7xl mx-auto">
-            <div 
-              className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-charcoal to-charcoal-dark border border-gold/20 mb-16"
-              style={{
-                background: `linear-gradient(135deg, rgba(18, 38, 32, 0.95), rgba(28, 45, 36, 0.95)), linear-gradient(45deg, rgba(214, 173, 96, 0.1), rgba(214, 173, 96, 0.05))`,
-              }}
-            >
-              <div className="px-8 py-16 md:px-16 md:py-24 text-center">
-                <div className="inline-block bg-gradient-to-r from-gold to-tan text-charcoal-dark px-6 py-2 rounded-full font-bold mb-6 text-sm uppercase tracking-wide">
-                  🚀 Premium SMM Panel
-                </div>
-                
-                <h1 className="text-4xl md:text-6xl font-bold text-gold mb-6 leading-tight">
-                  Boost Your Social Media<br />
-                  <span className="text-cream">Instantly</span>
-                </h1>
-                
-                <p className="text-xl md:text-2xl text-cream/80 mb-8 max-w-3xl mx-auto">
-                  Get premium followers, likes, views, and comments at competitive prices starting from ₹11/1000
-                </p>
-
-                {/* Welcome Bonus Card */}
-                <div className="inline-block bg-charcoal/90 backdrop-blur-sm border border-gold/30 rounded-2xl p-8 mb-8 shadow-2xl bonus-card">
-                  <div className="text-center">
-                    <div className="bonus-icon mb-4">
-                      <i className="fas fa-gift text-gold text-5xl heartbeat"></i>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gold mb-2">Welcome Bonus</h3>
-                    <p className="text-cream/80 mb-4 text-lg">Claim your free followers now!</p>
-                    <Button 
-                      onClick={handleClaimBonus}
-                      disabled={claimBonus.isPending || (isAuthenticated && user?.bonusClaimed)}
-                      className="btn-primary pulse-glow heartbeat"
-                    >
-                      {claimBonus.isPending ? (
-                        <i className="fas fa-spinner fa-spin mr-2"></i>
-                      ) : (
-                        <i className="fas fa-star mr-2"></i>
-                      )}
-                      {isAuthenticated && user?.bonusClaimed ? "Bonus Claimed" : "Claim Now"}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                  <Button 
-                    onClick={() => {
-                      setIsFromBonus(false);
-                      setIsAuthModalOpen(true);
-                    }}
-                    className="btn-primary hover:scale-105 transition-all duration-300"
-                  >
-                    <i className="fas fa-rocket mr-2"></i>Get Started Free
-                  </Button>
-                  <Link href="/services">
-                    <Button variant="outline" className="btn-outline">
-                      <i className="fas fa-eye mr-2"></i>View Services
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-              <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
-                <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-tan/20 rounded-full flex items-center justify-center mb-4">
-                  <i className="fas fa-users text-gold text-2xl"></i>
-                </div>
-                <h3 className="text-xl font-bold text-gold mb-2">Real Followers</h3>
-                <p className="text-cream/80">High-quality Indian and international followers starting from ₹24/1000</p>
-              </div>
-
-              <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
-                <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-tan/20 rounded-full flex items-center justify-center mb-4">
-                  <i className="fas fa-heart text-gold text-2xl"></i>
-                </div>
-                <h3 className="text-xl font-bold text-gold mb-2">Instant Likes</h3>
-                <p className="text-cream/80">Boost engagement with authentic likes starting from ₹12/1000</p>
-              </div>
-
-              <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
-                <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-tan/20 rounded-full flex items-center justify-center mb-4">
-                  <i className="fas fa-eye text-gold text-2xl"></i>
-                </div>
-                <h3 className="text-xl font-bold text-gold mb-2">Video Views</h3>
-                <p className="text-cream/80">Increase video reach with premium views starting from ₹11/1000</p>
-              </div>
-
-              <div className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105">
-                <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-tan/20 rounded-full flex items-center justify-center mb-4">
-                  <i className="fas fa-comments text-gold text-2xl"></i>
-                </div>
-                <h3 className="text-xl font-bold text-gold mb-2">Comments</h3>
-                <p className="text-cream/80">Drive conversations with comments starting from ₹18/1000</p>
-              </div>
-            </div>
-
-            {/* Stats Section */}
-            <div className="bg-charcoal border border-gold/20 rounded-2xl p-8 text-center">
-              <h2 className="text-3xl font-bold text-gold mb-8">Why Choose InstaBoost Pro?</h2>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div>
-                  <div className="text-4xl font-bold text-gold mb-2">50K+</div>
-                  <div className="text-cream/70">Happy Customers</div>
-                </div>
-                <div>
-                  <div className="text-4xl font-bold text-gold mb-2">24/7</div>
-                  <div className="text-cream/70">Customer Support</div>
-                </div>
-                <div>
-                  <div className="text-4xl font-bold text-gold mb-2">99.9%</div>
-                  <div className="text-cream/70">Delivery Rate</div>
-                </div>
-              </div>
-            </div>
+        <section className="max-w-6xl mx-auto mb-16">
+          <div className="text-center mb-12">
+            <h1 className="text-5xl font-bold text-gray-900 mb-6">
+              Welcome to <span className="text-blue-600">InstaBoost</span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Professional Instagram Growth Services - Boost your social media presence with our premium services
+            </p>
           </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">50K+</div>
+                <p className="text-gray-600">Happy Customers</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <Sparkles className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">14</div>
+                <p className="text-gray-600">Premium Services</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <Clock className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">24/7</div>
+                <p className="text-gray-600">Fast Delivery</p>
+              </CardContent>
+            </Card>
+            <Card className="text-center bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="pt-6">
+                <Shield className="h-8 w-8 text-red-600 mx-auto mb-2" />
+                <div className="text-2xl font-bold text-gray-900">100%</div>
+                <p className="text-gray-600">Secure & Safe</p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="max-w-6xl mx-auto mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-blue-600">
+                  <Users className="h-5 w-5" />
+                  Instagram Followers
+                </CardTitle>
+                <CardDescription>
+                  Get real, active followers from India, USA, and worldwide
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  High-quality followers that engage with your content and help grow your presence organically.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-green-600">
+                  <Sparkles className="h-5 w-5" />
+                  Instagram Likes
+                </CardTitle>
+                <CardDescription>
+                  Boost your posts with authentic likes from real accounts
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Increase engagement on your posts with likes from real, active Instagram users.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-purple-600">
+                  <Clock className="h-5 w-5" />
+                  Fast Delivery
+                </CardTitle>
+                <CardDescription>
+                  Quick processing and delivery of all services
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Get your orders processed and delivered within minutes of placing them.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section className="max-w-4xl mx-auto text-center">
+          <Card className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-2xl">
+            <CardContent className="pt-8 pb-8">
+              <h2 className="text-3xl font-bold mb-4">
+                Ready to Grow Your Instagram?
+              </h2>
+              <p className="text-xl mb-6 text-blue-100">
+                Join thousands of satisfied customers and boost your social media presence today
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-100 font-semibold px-8"
+                >
+                  View Services
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8"
+                >
+                  Get Started
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </section>
       </div>
 
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
+      <AuthModal
+        isOpen={isAuthModalOpen}
         onClose={() => {
           setIsAuthModalOpen(false);
           setIsFromBonus(false);
         }}
         isFromBonus={isFromBonus}
       />
-    </>
+    </div>
   );
 }
