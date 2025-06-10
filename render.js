@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import { fileURLToPath } from 'url';
@@ -43,8 +44,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from dist directory
-app.use(express.static(path.join(__dirname, 'dist')));
+// Serve static files from dist directory if it exists, otherwise serve from client
+const distPath = path.join(__dirname, 'dist');
+const clientPath = path.join(__dirname, 'client');
+
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+} else if (fs.existsSync(clientPath)) {
+  app.use(express.static(clientPath));
+} else {
+  console.log('⚠️ No static files directory found');
+}
 
 // User schema for MongoDB
 const userSchema = new mongoose.Schema({
@@ -694,7 +704,20 @@ app.post('/api/bonus/claim', async (req, res) => {
 
 // Catch all handler for SPA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  const distIndexPath = path.join(__dirname, 'dist', 'index.html');
+  const clientIndexPath = path.join(__dirname, 'client', 'index.html');
+  
+  if (fs.existsSync(distIndexPath)) {
+    res.sendFile(distIndexPath);
+  } else if (fs.existsSync(clientIndexPath)) {
+    res.sendFile(clientIndexPath);
+  } else {
+    res.json({ 
+      message: 'SMM Panel API Server Running', 
+      status: 'OK',
+      endpoints: ['/api/health', '/api/auth/login', '/api/services', '/api/orders', '/api/payments']
+    });
+  }
 });
 
 // Setup Telegram webhook
