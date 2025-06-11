@@ -329,20 +329,21 @@ app.get('/api/auth/user', async (req, res) => {
 // Services endpoint
 app.get('/api/services', (req, res) => {
   const services = [
-    { id: 1, name: 'Instagram Followers (Indian)', category: 'followers', rate: 6, minOrder: 100, maxOrder: 100000 },
-    { id: 2, name: 'Instagram Followers (USA)', category: 'followers', rate: 7, minOrder: 100, maxOrder: 50000 },
-    { id: 3, name: 'Instagram Followers (HQ Non Drop)', category: 'followers', rate: 11, minOrder: 100, maxOrder: 10000 },
-    { id: 4, name: 'Instagram Followers (Global Mix)', category: 'followers', rate: 8, minOrder: 50, maxOrder: 75000 },
-    { id: 5, name: 'Instagram Likes (Bot)', category: 'likes', rate: 2, minOrder: 100, maxOrder: 50000 },
-    { id: 6, name: 'Instagram Likes (Non Drop)', category: 'likes', rate: 4, minOrder: 100, maxOrder: 25000 },
-    { id: 7, name: 'Instagram Likes (Girl Accounts)', category: 'likes', rate: 6, minOrder: 100, maxOrder: 10000 },
-    { id: 8, name: 'Instagram Likes (Indian Real)', category: 'likes', rate: 5, minOrder: 50, maxOrder: 15000 },
-    { id: 9, name: 'Instagram Views (Video Fast)', category: 'views', rate: 1, minOrder: 1000, maxOrder: 1000000 },
-    { id: 10, name: 'Instagram Views (Story Premium)', category: 'views', rate: 3, minOrder: 500, maxOrder: 50000 },
-    { id: 11, name: 'Instagram Views (Reel HQ)', category: 'views', rate: 2, minOrder: 1000, maxOrder: 500000 },
-    { id: 12, name: 'Instagram Comments (Random)', category: 'comments', rate: 15, minOrder: 10, maxOrder: 1000 },
-    { id: 13, name: 'Instagram Comments (Custom Text)', category: 'comments', rate: 20, minOrder: 5, maxOrder: 500 },
-    { id: 14, name: 'Instagram Comments (Emoji Only)', category: 'comments', rate: 12, minOrder: 10, maxOrder: 1500 }
+    { id: 1, name: 'Instagram Followers (Indian)', category: 'followers', rate: 26, minOrder: 770, maxOrder: 100000 },
+    { id: 2, name: 'Instagram Followers (USA)', category: 'followers', rate: 27, minOrder: 741, maxOrder: 50000 },
+    { id: 3, name: 'Instagram Followers (HQ Non Drop)', category: 'followers', rate: 31, minOrder: 646, maxOrder: 25000 },
+    { id: 4, name: 'Instagram Followers (Global Mix)', category: 'followers', rate: 24.5, minOrder: 817, maxOrder: 200000 },
+    { id: 5, name: 'Instagram Followers (Bot Followers)', category: 'followers', rate: 15, minOrder: 1334, maxOrder: 150000 },
+    { id: 6, name: 'Instagram Likes (Bot)', category: 'likes', rate: 12, minOrder: 1667, maxOrder: 100000 },
+    { id: 7, name: 'Instagram Likes (Non Drop)', category: 'likes', rate: 14.5, minOrder: 1380, maxOrder: 50000 },
+    { id: 8, name: 'Instagram Likes (Girl Accounts)', category: 'likes', rate: 16, minOrder: 1250, maxOrder: 25000 },
+    { id: 9, name: 'Instagram Likes (Indian Real)', category: 'likes', rate: 13.5, minOrder: 1482, maxOrder: 30000 },
+    { id: 10, name: 'Instagram Views (Video Fast)', category: 'views', rate: 11.2, minOrder: 1786, maxOrder: 1000000 },
+    { id: 11, name: 'Instagram Views (Story Premium)', category: 'views', rate: 12.8, minOrder: 1563, maxOrder: 50000 },
+    { id: 12, name: 'Instagram Views (Reel HQ)', category: 'views', rate: 11.5, minOrder: 1740, maxOrder: 500000 },
+    { id: 13, name: 'Instagram Comments (Random)', category: 'comments', rate: 18, minOrder: 112, maxOrder: 1000 },
+    { id: 14, name: 'Instagram Comments (Custom Text)', category: 'comments', rate: 25, minOrder: 80, maxOrder: 500 },
+    { id: 15, name: 'Instagram Comments (Emoji Only)', category: 'comments', rate: 15, minOrder: 134, maxOrder: 1500 }
   ];
   res.json(services);
 });
