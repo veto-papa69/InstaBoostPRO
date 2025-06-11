@@ -45,21 +45,24 @@ export default function Home() {
 
   return (
     <>
-      <div className="pt-20 pb-16">
+      {/* Sticky Announcement Banner */}
+      <div className="fixed top-16 left-0 right-0 z-40 announcement-banner">
+        <div className="relative overflow-hidden backdrop-blur-md bg-gradient-to-r from-red-600/20 via-red-500/20 to-red-700/20 border-b border-red-400/30 shadow-lg announcement-glow">
+          <div className="flex whitespace-nowrap animate-marquee py-3">
+            <span className="text-sm font-bold text-red-100">
+              🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
+            </span>
+            <span className="text-sm font-bold text-red-100 ml-4">
+              🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-28 pb-16">
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
-            {/* Announcement Banner */}
-            <div className="relative overflow-hidden rounded-xl mb-6 backdrop-blur-md bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-600/10 border border-orange-400/20 shadow-lg">
-              <div className="flex whitespace-nowrap animate-marquee py-3">
-                <span className="text-sm font-bold text-orange-200">
-                  🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
-                </span>
-                <span className="text-sm font-bold text-orange-200 ml-4">
-                  🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
-                </span>
-              </div>
-            </div>
             
             <div 
               className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-charcoal to-charcoal-dark border border-gold/20 mb-16"
