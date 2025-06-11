@@ -50,10 +50,13 @@ export default function Home() {
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
             {/* Announcement Banner */}
-            <div className="relative overflow-hidden rounded-xl mb-6 backdrop-blur-md bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-600/20 border border-orange-400/30 shadow-lg">
-              <div className="whitespace-nowrap animate-marquee py-3">
-                <span className="text-sm font-bold px-8 text-orange-200 drop-shadow-lg">
-                  🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
+            <div className="relative overflow-hidden rounded-xl mb-6 backdrop-blur-md bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-600/10 border border-orange-400/20 shadow-lg">
+              <div className="flex whitespace-nowrap animate-marquee py-3">
+                <span className="text-sm font-bold text-orange-200 drop-shadow-lg">
+                  🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
+                </span>
+                <span className="text-sm font-bold text-orange-200 drop-shadow-lg ml-4">
+                  🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
                 </span>
               </div>
             </div>
