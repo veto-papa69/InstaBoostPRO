@@ -18,7 +18,6 @@
   animation: marquee 40s linear infinite;
   display: flex;
   will-change: transform;
-  backdrop-filter: blur(15px);
 }
 
 :root {
