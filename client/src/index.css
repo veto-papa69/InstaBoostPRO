@@ -15,9 +15,10 @@
 }
 
 .animate-marquee {
-  animation: marquee 40s linear infinite;
+  animation: marquee 35s linear infinite;
   display: inline-block;
   will-change: transform;
+  backdrop-filter: blur(10px);
 }
 
 :root {
