@@ -21,6 +21,13 @@
   will-change: transform;
 }
 
+.animate-scroll-slow {
+  animation: scroll 80s linear infinite;
+  white-space: nowrap;
+  display: inline-block;
+  will-change: transform;
+}
+
 /* Ensure the banner container has proper overflow settings */
 .announcement-banner {
   overflow: hidden;
