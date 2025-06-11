@@ -46,7 +46,7 @@ export default function Home() {
   return (
     <>
       {/* Sticky Announcement Banner */}
-      <div className="fixed top-16 left-0 right-0 z-40 announcement-banner">
+      <div className="fixed top-20 left-0 right-0 z-40 announcement-banner">
         <div className="relative overflow-hidden backdrop-blur-md bg-gradient-to-r from-red-600/20 via-red-500/20 to-red-700/20 border-b border-red-400/30 shadow-lg announcement-glow">
           <div className="flex whitespace-nowrap animate-marquee py-3">
             <span className="text-sm font-bold text-red-100">
@@ -59,7 +59,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="pt-28 pb-16">
+      <div className="pt-32 pb-16">
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
