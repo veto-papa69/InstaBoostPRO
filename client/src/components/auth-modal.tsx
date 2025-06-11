@@ -57,9 +57,10 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
       // Force page reload to update authentication state
       window.location.reload();
     } catch (error: any) {
+      console.error("Login error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Login failed. Please check your credentials.",
+        title: "Login Failed",
+        description: error.message || "Unable to connect to server. Please try again.",
         variant: "destructive",
       });
     }

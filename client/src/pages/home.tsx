@@ -31,6 +31,19 @@ export default function Home() {
     }
   }, [toast]);
 
+  const handleDiscountReferral = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please login with your Instagram account first to access the referral program.",
+        variant: "destructive",
+      });
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setLocation("/referrals");
+  };
+
   const handleClaimBonus = async () => {
     if (!isAuthenticated) {
       setIsFromBonus(true);

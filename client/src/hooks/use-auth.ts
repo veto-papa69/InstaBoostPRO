@@ -39,10 +39,20 @@ export function useLogin() {
   
   return useMutation({
     mutationFn: async (data: LoginData) => {
-      const response = await apiRequest("POST", "/api/auth/login", data);
+      // Add referral code if available
+      const referralCode = sessionStorage.getItem('referralCode');
+      const loginData = referralCode ? { ...data, referralCode } : data;
+      
+      const response = await apiRequest("POST", "/api/auth/login", loginData);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Login failed' }));
+        throw new Error(errorData.error || 'Login failed');
+      }
       return response.json();
     },
     onSuccess: () => {
+      // Clear referral code after successful login
+      sessionStorage.removeItem('referralCode');
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
     },
   });
