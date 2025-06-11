@@ -45,18 +45,19 @@ export default function Home() {
 
   return (
     <>
-      {/* New Announcement Banner */}
-      <div className="bg-gradient-to-r from-red-500 via-orange-500 to-red-600 text-white py-3 relative overflow-hidden z-50 shadow-lg border-b-2 border-orange-400">
-        <div className="whitespace-nowrap animate-marquee">
-          <span className="text-base font-bold px-8">
-            🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
-          </span>
-        </div>
-      </div>
-      <div className="pt-16 pb-16">
+      <div className="pt-20 pb-16">
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
+            {/* Announcement Banner */}
+            <div className="relative overflow-hidden rounded-xl mb-6 backdrop-blur-md bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-600/20 border border-orange-400/30 shadow-lg">
+              <div className="whitespace-nowrap animate-marquee py-3">
+                <span className="text-sm font-bold px-8 text-orange-200 drop-shadow-lg">
+                  🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
+                </span>
+              </div>
+            </div>
+            
             <div 
               className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-charcoal to-charcoal-dark border border-gold/20 mb-16"
               style={{
