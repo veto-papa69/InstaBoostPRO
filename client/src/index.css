@@ -4,20 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes marquee {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 15s linear infinite;
-}
-
-/* Banner Animation */
+/* Announcement Banner Animation */
 @keyframes scroll {
   0% {
     transform: translateX(100%);
@@ -28,34 +15,54 @@
 }
 
 .animate-scroll {
-  display: inline-block;
-  animation: scroll 25s linear infinite;
+  animation: scroll 45s linear infinite;
   white-space: nowrap;
+  display: inline-block;
   will-change: transform;
 }
 
+/* Ensure the banner container has proper overflow settings */
+.announcement-banner {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  z-index: 30;
+}
+
 :root {
-  /* Clean dark theme colors */
-  --background: 210 40% 2%;
-  --foreground: 213 31% 91%;
-  --card: 210 40% 7%;
-  --card-foreground: 213 31% 91%;
-  --popover: 210 40% 7%;
-  --popover-foreground: 213 31% 91%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 210 40% 2%;
-  --secondary: 210 40% 12%;
-  --secondary-foreground: 213 31% 91%;
-  --muted: 210 40% 12%;
-  --muted-foreground: 210 10% 50%;
-  --accent: 210 40% 12%;
-  --accent-foreground: 213 31% 91%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 213 31% 91%;
-  --border: 210 40% 12%;
-  --input: 210 40% 12%;
-  --ring: 210 40% 61%;
-  --radius: 0.5rem;
+  /* Exact theme colors */
+  --main-bg: #0e1d18;
+  --card-bg: #1c2d24;
+  --navbar-bg: #122620;
+  --footer-bg: #122620;
+  --primary-text: #f4ebd0;
+  --muted-text: #cccccc;
+  --gold: #d6ad60;
+  --success-green: #3ccf4e;
+  --error-red: #f44336;
+  --input-placeholder: #999999;
+  
+  /* Tailwind variables */
+  --background: 14 29 24; /* #0e1d18 */
+  --foreground: 244 235 208; /* #f4ebd0 */
+  --card: 28 45 36; /* #1c2d24 */
+  --card-foreground: 244 235 208; /* #f4ebd0 */
+  --popover: 28 45 36; /* #1c2d24 */
+  --popover-foreground: 244 235 208; /* #f4ebd0 */
+  --primary: 214 173 96; /* #d6ad60 */
+  --primary-foreground: 18 38 32; /* #122620 */
+  --secondary: 28 45 36; /* #1c2d24 */
+  --secondary-foreground: 244 235 208; /* #f4ebd0 */
+  --muted: 18 38 32; /* #122620 */
+  --muted-foreground: 204 204 204; /* #cccccc */
+  --accent: 28 45 36; /* #1c2d24 */
+  --accent-foreground: 244 235 208; /* #f4ebd0 */
+  --destructive: 244 67 54; /* #f44336 */
+  --destructive-foreground: 244 235 208; /* #f4ebd0 */
+  --border: 214 173 96; /* #d6ad60 */
+  --input: 14 29 24; /* #0e1d18 */
+  --ring: 214 173 96; /* #d6ad60 */
+  --radius: 1rem;
 }
 
 /* Enhanced modal backdrop blur effects */
@@ -89,40 +96,40 @@
     @apply bg-gradient-to-r from-gold to-tan text-charcoal-dark px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
-
+  
   .btn-primary:hover {
     box-shadow: 0 10px 15px -3px rgba(214, 173, 96, 0.3), 0 4px 6px -2px rgba(214, 173, 96, 0.05);
   }
-
+  
   .btn-outline {
     @apply border-2 border-gold text-gold px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300;
   }
-
+  
   .btn-outline:hover {
     background-color: rgba(214, 173, 96, 0.1);
     box-shadow: 0 10px 15px -3px rgba(214, 173, 96, 0.2), 0 4px 6px -2px rgba(214, 173, 96, 0.05);
   }
-
+  
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
-
+  
   .heartbeat {
     animation: heartbeat 1.5s ease-in-out infinite;
   }
-
+  
   .bonus-card {
     animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite;
   }
-
+  
   .bonus-icon {
     animation: bounce-scale 2s ease-in-out infinite;
   }
-
+  
   .nav-link {
     @apply text-cream hover:text-gold transition-colors duration-300 font-medium;
   }
-
+  
   .animate-scroll {
     animation: scroll 15s linear infinite;
   }
@@ -141,55 +148,55 @@
   .text-charcoal-dark {
     color: hsl(var(--charcoal-dark));
   }
-
+  
   .text-charcoal {
     color: hsl(var(--charcoal));
   }
-
+  
   .text-gold {
     color: hsl(var(--gold));
   }
-
+  
   .text-tan {
     color: hsl(var(--tan));
   }
-
+  
   .text-cream {
     color: hsl(var(--cream));
   }
-
+  
   .bg-charcoal-dark {
     background-color: hsl(var(--charcoal-dark));
   }
-
+  
   .bg-charcoal {
     background-color: hsl(var(--charcoal));
   }
-
+  
   .bg-gold {
     background-color: hsl(var(--gold));
   }
-
+  
   .bg-tan {
     background-color: hsl(var(--tan));
   }
-
+  
   .bg-cream {
     background-color: hsl(var(--cream));
   }
-
+  
   .border-gold {
     border-color: hsl(var(--gold));
   }
-
+  
   .from-gold {
     --tw-gradient-from: hsl(var(--gold));
   }
-
+  
   .to-tan {
     --tw-gradient-to: hsl(var(--tan));
   }
-
+  
   .shadow-gold {
     --tw-shadow-color: hsl(var(--gold));
   }
