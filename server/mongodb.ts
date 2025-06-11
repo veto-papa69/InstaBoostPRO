@@ -172,32 +172,49 @@ const loginLogSchema = new mongoose.Schema({
   }
 });
 
+const referralSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  referralCode: { type: String, required: true, unique: true },
+  referredUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  isCompleted: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const discountRewardSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  hasClaimedDiscount: { type: Boolean, default: false },
+  claimedAt: { type: Date },
+  createdAt: { type: Date, default: Date.now }
+});
+
 // Create Models
 export const User = mongoose.model('User', userSchema);
 export const Order = mongoose.model('Order', orderSchema);
 export const Payment = mongoose.model('Payment', paymentSchema);
 export const Service = mongoose.model('Service', serviceSchema);
 export const LoginLog = mongoose.model('LoginLog', loginLogSchema);
+export const Referral = mongoose.model('Referral', referralSchema);
+export const DiscountReward = mongoose.model('DiscountReward', discountRewardSchema);
 
 // MongoDB Connection Function
 export async function connectMongoDB() {
   try {
     if (mongoose.connection.readyState === 0) {
       console.log('🔄 Connecting to MongoDB...');
-      
+
       await mongoose.connect(MONGODB_URI, {
         maxPoolSize: 10,
         serverSelectionTimeoutMS: 5000,
         socketTimeoutMS: 45000,
         bufferCommands: false
       });
-      
+
       console.log('✅ MongoDB connected successfully');
       console.log(`📊 Database: ${mongoose.connection.name}`);
-      
+
       // Initialize default services if collection is empty
       await initializeServices();
-      
+
     } else {
       console.log('✅ MongoDB already connected');
     }
@@ -211,10 +228,10 @@ export async function connectMongoDB() {
 async function initializeServices() {
   try {
     const serviceCount = await Service.countDocuments();
-    
+
     if (serviceCount === 0) {
       console.log('🔄 Initializing default services...');
-      
+
       const defaultServices = [
         // Followers Services (increased by ₹20)
         {
@@ -262,7 +279,7 @@ async function initializeServices() {
           deliveryTime: "0-3 hours",
           active: true
         },
-        
+
         // Likes Services (increased by ₹10)
         {
           name: "Instagram Likes - Bot Likes",
@@ -300,7 +317,7 @@ async function initializeServices() {
           deliveryTime: "0-2 hours",
           active: true
         },
-        
+
         // Views Services (increased by ₹10)
         {
           name: "Instagram Video Views - Fast",
@@ -329,7 +346,7 @@ async function initializeServices() {
           deliveryTime: "0-1 hour",
           active: true
         },
-        
+
         // Comments Services (increased by ₹10)
         {
           name: "Instagram Comments - Random Positive",
@@ -359,7 +376,7 @@ async function initializeServices() {
           active: true
         }
       ];
-      
+
       await Service.insertMany(defaultServices);
       console.log('✅ Default services initialized successfully');
     } else {

@@ -15,6 +15,7 @@ import FAQ from "@/pages/faq";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import NotFound from "@/pages/not-found";
+import { lazy } from "react";
 
 function Router() {
   return (
@@ -24,7 +25,8 @@ function Router() {
       <Route path="/wallet" component={Wallet} />
       <Route path="/add-funds" component={AddFunds} />
       <Route path="/orders" component={Orders} />
-      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/referrals" component={lazy(() => import("./pages/referrals"))} />
+      <Route path="/services-discount" component={lazy(() => import("./pages/services-discount"))} />
       <Route path="/faq" component={FAQ} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />

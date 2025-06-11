@@ -339,6 +339,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.uid = user.uid;
       console.log("Session updated for user:", user.id);
 
+      // Check for referral code in session (from query parameter)
+      const referralCode = req.body.referralCode;
+      if (referralCode && isNewUser) {
+        try {
+          const referrerData = await storage.getUserByReferralCode(referralCode);
+          if (referrerData && referrerData.id !== user.id) {
+            // Create referral record
+            await storage.createReferralRecord(referrerData.id, user.id, referralCode);
+            console.log(`Referral recorded: ${referrerData.uid} referred ${user.uid}`);
+          }
+        } catch (referralError) {
+          console.error("Referral tracking error:", referralError);
+          // Don't fail login if referral tracking fails
+        }
+      }
+
       res.json({
         success: true,
         user: {
@@ -660,6 +676,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Claim bonus error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  // Referral endpoints
+  app.get("/api/referrals", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get or create referral code
+      let referralData = await storage.getUserReferralData(user.id);
+      if (!referralData) {
+        const referralCode = `REF${user.uid}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+        referralData = await storage.createUserReferral(user.id, referralCode);
+      }
+
+      const referralCount = await storage.getReferralCount(user.id);
+      const isEligibleForDiscount = referralCount >= 5;
+      const hasClaimedDiscount = await storage.hasClaimedDiscount(user.id);
+
+      // Create referral link
+      const baseUrl = process.env.NODE_ENV === 'production' 
+        ? (process.env.RENDER_EXTERNAL_URL || 'https://your-domain.com')
+        : `https://${process.env.REPL_ID || 'local'}.${process.env.REPLIT_CLUSTER || 'replit'}.repl.co`;
+      
+      const referralLink = `${baseUrl}?ref=${referralData.referralCode}`;
+
+      res.json({
+        referralCode: referralData.referralCode,
+        referralLink,
+        referralCount,
+        isEligibleForDiscount,
+        hasClaimedDiscount,
+      });
+    } catch (error) {
+      console.error("Get referrals error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  app.post("/api/referrals/claim-reward", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const referralCount = await storage.getReferralCount(user.id);
+      if (referralCount < 5) {
+        return res.status(400).json({ error: "Not enough referrals to claim reward" });
+      }
+
+      const hasClaimedDiscount = await storage.hasClaimedDiscount(user.id);
+      if (hasClaimedDiscount) {
+        return res.status(400).json({ error: "Discount already claimed" });
+      }
+
+      // Mark discount as claimed
+      await storage.claimDiscountReward(user.id);
+
+      res.json({ success: true, message: "Discount reward claimed successfully!" });
+    } catch (error) {
+      console.error("Claim reward error:", error);
+      res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  app.get("/api/referrals/discount-access", async (req, res) => {
+    if (!req.session.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    try {
+      const hasClaimedDiscount = await storage.hasClaimedDiscount(req.session.userId);
+      res.json(hasClaimedDiscount);
+    } catch (error) {
+      console.error("Check discount access error:", error);
       res.status(500).json({ error: "Server error" });
     }
   });

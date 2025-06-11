@@ -46,9 +46,10 @@ interface ServiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   service: Service | null;
+  isDiscounted?: boolean;
 }
 
-export function ServiceModal({ isOpen, onClose, service }: ServiceModalProps) {
+export function ServiceModal({ isOpen, onClose, service, isDiscounted = false }: ServiceModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();

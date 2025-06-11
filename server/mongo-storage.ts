@@ -46,12 +46,27 @@ const loginLogSchema = new mongoose.Schema({
   loginCount: { type: Number, required: true }
 }, { timestamps: true });
 
+const referralSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  referralCode: { type: String, required: true, unique: true },
+  referredUserId: { type: String }, // Optional: Tracks who was referred by this code
+  isCompleted: { type: Boolean, default: false } // Indicates if referral is complete (e.g., 5 referrals made)
+});
+
+const discountRewardSchema = new mongoose.Schema({
+  userId: { type: String, required: true, unique: true },
+  hasClaimedDiscount: { type: Boolean, default: false },
+  claimedAt: { type: Date }
+});
+
 // Models
 const User = mongoose.model('User', userSchema);
 const Order = mongoose.model('Order', orderSchema);
 const Payment = mongoose.model('Payment', paymentSchema);
 const Service = mongoose.model('Service', serviceSchema);
 const LoginLog = mongoose.model('LoginLog', loginLogSchema);
+const Referral = mongoose.model('Referral', referralSchema);
+const DiscountReward = mongoose.model('DiscountReward', discountRewardSchema);
 
 // Storage implementation
 export class MongoStorage {
@@ -64,7 +79,7 @@ export class MongoStorage {
         await mongoose.connect(MONGODB_URI);
         this.connected = true;
         console.log('✅ MongoDB connected successfully');
-        
+
         // Initialize services
         await this.initializeServices();
       }
@@ -118,7 +133,71 @@ export class MongoStorage {
 
   async markBonusClaimed(userId: string): Promise<void> {
     await User.findByIdAndUpdate(userId, { bonusClaimed: true });
-  }
+  },
+
+  // Referral methods
+  async getUserReferralData(userId: string): Promise<any> {
+    return await Referral.findOne({ userId });
+  },
+
+  async createUserReferral(userId: string, referralCode: string): Promise<any> {
+    const referral = new Referral({
+      userId,
+      referralCode,
+      isCompleted: false,
+    });
+    await referral.save();
+    return referral;
+  },
+
+  async getReferralCount(userId: string): Promise<number> {
+    return await Referral.countDocuments({ 
+      userId, 
+      isCompleted: true 
+    });
+  },
+
+  async hasClaimedDiscount(userId: string): Promise<boolean> {
+    const reward = await DiscountReward.findOne({ userId });
+    return reward ? reward.hasClaimedDiscount : false;
+  },
+
+  async claimDiscountReward(userId: string): Promise<void> {
+    await DiscountReward.findOneAndUpdate(
+      { userId },
+      { 
+        hasClaimedDiscount: true,
+        claimedAt: new Date()
+      },
+      { upsert: true }
+    );
+  },
+
+  async getUserByReferralCode(referralCode: string): Promise<any> {
+    const referral = await Referral.findOne({ referralCode });
+    if (referral) {
+      return await User.findById(referral.userId);
+    }
+    return null;
+  },
+
+  async createReferralRecord(referrerUserId: string, referredUserId: string, referralCode: string): Promise<void> {
+    // Check if this referral already exists
+    const existingReferral = await Referral.findOne({
+      userId: referrerUserId,
+      referredUserId: referredUserId
+    });
+
+    if (!existingReferral) {
+      const referral = new Referral({
+        userId: referrerUserId,
+        referralCode,
+        referredUserId,
+        isCompleted: true,
+      });
+      await referral.save();
+    }
+  },
 
   async createOrder(orderData: any): Promise<any> {
     const order = new Order(orderData);
@@ -209,7 +288,7 @@ export class MongoStorage {
       const count = await Service.countDocuments();
       if (count === 0) {
         console.log('🔄 Initializing default services...');
-        
+
         const defaultServices = [
           {
             name: "Instagram Followers - Indian",
@@ -257,7 +336,7 @@ export class MongoStorage {
             active: true
           }
         ];
-        
+
         await Service.insertMany(defaultServices);
         console.log('✅ Default services initialized');
       } else {
@@ -271,13 +350,13 @@ export class MongoStorage {
   async logUserLogin(userId: string, instagramUsername: string): Promise<number> {
     const count = await this.getUserLoginCount(userId);
     const newCount = count + 1;
-    
+
     const loginLog = new LoginLog({
       userId,
       instagramUsername,
       loginCount: newCount
     });
-    
+
     await loginLog.save();
     return newCount;
   }

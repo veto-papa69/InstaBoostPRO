@@ -1,16 +1,35 @@
-import { useState } from "react";
-import { Link } from "wouter";
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
 import { useAuth, useClaimBonus } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { AuthModal } from "@/components/auth-modal";
 
 export default function Home() {
+  const [, setLocation] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const claimBonus = useClaimBonus();
   const { toast } = useToast();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isFromBonus, setIsFromBonus] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+
+  // Check for referral code in URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+      // Store in sessionStorage for login process
+      sessionStorage.setItem('referralCode', refCode);
+      // Show message about referral
+      toast({
+        title: "Referral Link Detected!",
+        description: "Sign up now to help your friend get their discount reward!",
+      });
+    }
+  }, [toast]);
 
   const handleClaimBonus = async () => {
     if (!isAuthenticated) {
@@ -43,6 +62,27 @@ export default function Home() {
     }
   };
 
+  const handleGetStarted = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+    } else {
+      setLocation("/services");
+    }
+  };
+
+  const handleDiscountReferral = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please login with your Instagram account to access referral discounts.",
+        variant: "destructive",
+      });
+      setIsAuthModalOpen(true);
+    } else {
+      setLocation("/referrals");
+    }
+  };
+
   return (
     <>
       {/* Sticky Announcement Banner */}
@@ -63,7 +103,7 @@ export default function Home() {
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
-            
+
             <div 
               className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-charcoal to-charcoal-dark border border-gold/20 mb-16"
               style={{
@@ -78,12 +118,12 @@ export default function Home() {
                     className="w-32 h-32 object-contain"
                   />
                 </div>
-                
+
                 <h1 className="text-4xl md:text-6xl font-bold text-gold mb-6 leading-tight">
                   Boost Your Social Media<br />
                   <span className="text-cream">Instantly</span>
                 </h1>
-                
+
                 <p className="text-xl md:text-2xl text-cream/80 mb-8 max-w-3xl mx-auto">
                   Get premium followers, likes, views, and comments at competitive prices starting from ₹11/1000
                 </p>
@@ -111,21 +151,34 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
                   <Button 
-                    onClick={() => {
-                      setIsFromBonus(false);
-                      setIsAuthModalOpen(true);
-                    }}
-                    className="btn-primary hover:scale-105 transition-all duration-300"
+                    onClick={handleGetStarted}
+                    className="btn-primary text-lg px-8 py-4 hover:scale-105 transition-all duration-300"
                   >
                     <i className="fas fa-rocket mr-2"></i>Get Started Free
                   </Button>
                   <Link href="/services">
-                    <Button variant="outline" className="btn-outline">
+                    <Button 
+                      variant="outline" 
+                      className="btn-outline text-lg px-8 py-4 hover:scale-105 transition-all duration-300"
+                    >
                       <i className="fas fa-eye mr-2"></i>View Services
                     </Button>
                   </Link>
+                </div>
+
+                {/* Discount Referral Button */}
+                <div className="flex justify-center mb-12">
+                  <Button 
+                    onClick={handleDiscountReferral}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg px-12 py-4 rounded-xl shadow-lg hover:scale-105 transition-all duration-300 border-2 border-green-400"
+                    style={{ width: 'fit-content', minWidth: '320px' }}
+                  >
+                    <i className="fas fa-percentage mr-3"></i>
+                    Get Flat 50% Discount on Any Order
+                    <i className="fas fa-gift ml-3"></i>
+                  </Button>
                 </div>
               </div>
             </div>

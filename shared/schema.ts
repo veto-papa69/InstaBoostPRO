@@ -53,6 +53,23 @@ export const loginLogs = pgTable("login_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const referrals = pgTable("referrals", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  referralCode: varchar("referral_code", { length: 20 }).notNull().unique(),
+  referredUserId: integer("referred_user_id").references(() => users.id),
+  isCompleted: boolean("is_completed").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const discountRewards = pgTable("discount_rewards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  hasClaimedDiscount: boolean("has_claimed_discount").default(false).notNull(),
+  claimedAt: timestamp("claimed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   uid: true,
   instagramUsername: true,
@@ -95,6 +112,19 @@ export const insertLoginLogSchema = createInsertSchema(loginLogs).pick({
   loginCount: true,
 });
 
+export const insertReferralSchema = createInsertSchema(referrals).pick({
+  userId: true,
+  referralCode: true,
+  referredUserId: true,
+  isCompleted: true,
+});
+
+export const insertDiscountRewardSchema = createInsertSchema(discountRewards).pick({
+  userId: true,
+  hasClaimedDiscount: true,
+  claimedAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertOrder = z.infer<typeof insertOrderSchema>;
@@ -105,3 +135,7 @@ export type InsertService = z.infer<typeof insertServiceSchema>;
 export type Service = typeof services.$inferSelect;
 export type InsertLoginLog = z.infer<typeof insertLoginLogSchema>;
 export type LoginLog = typeof loginLogs.$inferSelect;
+export type InsertReferral = z.infer<typeof insertReferralSchema>;
+export type Referral = typeof referrals.$inferSelect;
+export type InsertDiscountReward = z.infer<typeof insertDiscountRewardSchema>;
+export type DiscountReward = typeof discountRewards.$inferSelect;
