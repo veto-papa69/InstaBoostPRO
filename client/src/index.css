@@ -4,8 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Announcement Banner Animation */
-@keyframes scroll {
+/* New Announcement Banner Animation */
+@keyframes marquee {
   0% {
     transform: translateX(100%);
   }
@@ -14,26 +14,10 @@
   }
 }
 
-.animate-scroll {
-  animation: scroll 45s linear infinite;
-  white-space: nowrap;
+.animate-marquee {
+  animation: marquee 40s linear infinite;
   display: inline-block;
   will-change: transform;
-}
-
-.animate-scroll-slow {
-  animation: scroll 80s linear infinite;
-  white-space: nowrap;
-  display: inline-block;
-  will-change: transform;
-}
-
-/* Ensure the banner container has proper overflow settings */
-.announcement-banner {
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-  z-index: 30;
 }
 
 :root {
