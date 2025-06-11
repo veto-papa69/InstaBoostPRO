@@ -45,15 +45,15 @@ export default function Home() {
 
   return (
     <>
-      {/* Animated Announcement Banner */}
-      <div className="bg-gradient-to-r from-red-600 to-orange-600 text-white py-4 announcement-banner fixed top-0 left-0 right-0 z-30 shadow-lg">
-        <div className="animate-scroll-slow">
-          <span className="text-lg font-bold inline-block pr-20">
-            🎉 EID FESTIVAL KHATAM - अब सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL KHATAM - अब सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL KHATAM - अब सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL KHATAM - अब सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - SERVICE PRICES HAVE BEEN INCREASED! 🎉
+      {/* New Announcement Banner */}
+      <div className="bg-gradient-to-r from-red-500 via-orange-500 to-red-600 text-white py-3 relative overflow-hidden z-50 shadow-lg border-b-2 border-orange-400">
+        <div className="whitespace-nowrap animate-marquee">
+          <span className="text-base font-bold px-8">
+            🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉 EID FESTIVAL समाप्त - अब सभी सर्विस की कीमतें बढ़ गई हैं! 🎉 EID FESTIVAL ENDED - ALL SERVICE PRICES HAVE BEEN INCREASED! 🎉
           </span>
         </div>
       </div>
-      <div className="pt-32 pb-16">
+      <div className="pt-16 pb-16">
         {/* Hero Section */}
         <section className="px-4 mb-16">
           <div className="max-w-7xl mx-auto">
