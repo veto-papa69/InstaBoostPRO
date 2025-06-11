@@ -71,8 +71,15 @@ export default function Home() {
               }}
             >
               <div className="px-8 py-16 md:px-16 md:py-24 text-center">
-                <div className="inline-block bg-gradient-to-r from-gold to-tan text-charcoal-dark px-6 py-2 rounded-full font-bold mb-6 text-sm uppercase tracking-wide">
-                  🚀 Premium SMM Panel
+                <div className="flex items-center justify-center mb-6">
+                  <img 
+                    src="https://files.catbox.moe/95hr3x.png" 
+                    alt="InstaBoost Pro Logo" 
+                    className="w-24 h-24 object-contain mr-4"
+                  />
+                  <div className="inline-block bg-gradient-to-r from-gold to-tan text-charcoal-dark px-6 py-2 rounded-full font-bold text-sm uppercase tracking-wide">
+                    🚀 Premium SMM Panel
+                  </div>
                 </div>
                 
                 <h1 className="text-4xl md:text-6xl font-bold text-gold mb-6 leading-tight">
