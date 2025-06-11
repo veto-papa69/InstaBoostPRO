@@ -20,6 +20,58 @@
   will-change: transform;
 }
 
+/* Announcement Banner Glow Effect */
+.announcement-banner {
+  backdrop-filter: blur(8px);
+}
+
+.announcement-glow {
+  position: relative;
+  box-shadow: 
+    0 0 20px rgba(220, 38, 38, 0.4),
+    0 0 40px rgba(239, 68, 68, 0.3),
+    0 0 60px rgba(220, 38, 38, 0.2);
+  animation: red-glow-pulse 3s ease-in-out infinite;
+}
+
+.announcement-glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    rgba(220, 38, 38, 0.1), 
+    rgba(239, 68, 68, 0.15), 
+    rgba(220, 38, 38, 0.1));
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes red-glow-pulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(220, 38, 38, 0.4),
+      0 0 40px rgba(239, 68, 68, 0.3),
+      0 0 60px rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(220, 38, 38, 0.6),
+      0 0 60px rgba(239, 68, 68, 0.5),
+      0 0 90px rgba(220, 38, 38, 0.4);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
 :root {
   /* Exact theme colors */
   --main-bg: #0e1d18;
