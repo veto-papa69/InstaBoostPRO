@@ -28,9 +28,9 @@
 .announcement-glow {
   position: relative;
   box-shadow: 
-    0 0 20px rgba(220, 38, 38, 0.4),
-    0 0 40px rgba(239, 68, 68, 0.3),
-    0 0 60px rgba(220, 38, 38, 0.2);
+    0 0 10px rgba(220, 38, 38, 0.2),
+    0 0 20px rgba(239, 68, 68, 0.15),
+    0 0 30px rgba(220, 38, 38, 0.1);
   animation: red-glow-pulse 3s ease-in-out infinite;
 }
 
@@ -51,15 +51,15 @@
 @keyframes red-glow-pulse {
   0%, 100% {
     box-shadow: 
-      0 0 20px rgba(220, 38, 38, 0.4),
-      0 0 40px rgba(239, 68, 68, 0.3),
-      0 0 60px rgba(220, 38, 38, 0.2);
+      0 0 10px rgba(220, 38, 38, 0.2),
+      0 0 20px rgba(239, 68, 68, 0.15),
+      0 0 30px rgba(220, 38, 38, 0.1);
   }
   50% {
     box-shadow: 
-      0 0 30px rgba(220, 38, 38, 0.6),
-      0 0 60px rgba(239, 68, 68, 0.5),
-      0 0 90px rgba(220, 38, 38, 0.4);
+      0 0 15px rgba(220, 38, 38, 0.3),
+      0 0 30px rgba(239, 68, 68, 0.2),
+      0 0 45px rgba(220, 38, 38, 0.15);
   }
 }
 
