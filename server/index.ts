@@ -4,7 +4,7 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import { APP_CONFIG } from "./config.js";
-import { routes } from "./routes.js";
+import { registerRoutes } from "./routes.js";
 import { MongoDBStorage } from "./mongodb-storage.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -44,10 +44,7 @@ storage.initializeDatabase().then(() => {
   console.error('❌ Database initialization failed:', err);
 });
 
-async function registerRoutes(app: express.Application): Promise<express.Application> {
-    app.use('/api', routes(storage));
-    return app;
-}
+// Remove this duplicate function since we're importing registerRoutes from routes.js
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -77,8 +74,8 @@ process.on('SIGINT', () => {
 // Start server with proper error handling
 async function startServer(port: number) {
   const server = app.listen(port, '0.0.0.0', async () => {
-      // API routes
-      const server = await registerRoutes(app);
+    // API routes
+    await registerRoutes(app);
 
     console.log(`🚀 Server running on port ${port}`);
     console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
