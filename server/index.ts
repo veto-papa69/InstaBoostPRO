@@ -76,7 +76,7 @@ async function startServer(port: number) {
   try {
     // Initialize storage and routes before starting server
     await registerRoutes(app);
-    
+
     const server = app.listen(port, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${port}`);
       console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
@@ -105,6 +105,10 @@ async function startServer(port: number) {
   });
 
   return server;
+} catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
 }
 
 // Add error handling for unhandled promises
