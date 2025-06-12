@@ -138,7 +138,7 @@ export class MongoStorage {
   // Referral methods
   async getUserReferralData(userId: string): Promise<any> {
     return await Referral.findOne({ userId });
-  },
+  }
 
   async createUserReferral(userId: string, referralCode: string): Promise<any> {
     const referral = new Referral({
@@ -148,19 +148,19 @@ export class MongoStorage {
     });
     await referral.save();
     return referral;
-  },
+  }
 
   async getReferralCount(userId: string): Promise<number> {
     return await Referral.countDocuments({ 
       userId, 
       isCompleted: true 
     });
-  },
+  }
 
   async hasClaimedDiscount(userId: string): Promise<boolean> {
     const reward = await DiscountReward.findOne({ userId });
     return reward ? reward.hasClaimedDiscount : false;
-  },
+  }
 
   async claimDiscountReward(userId: string): Promise<void> {
     await DiscountReward.findOneAndUpdate(
@@ -171,7 +171,7 @@ export class MongoStorage {
       },
       { upsert: true }
     );
-  },
+  }
 
   async getUserByReferralCode(referralCode: string): Promise<any> {
     const referral = await Referral.findOne({ referralCode });
@@ -179,7 +179,7 @@ export class MongoStorage {
       return await User.findById(referral.userId);
     }
     return null;
-  },
+  }
 
   async createReferralRecord(referrerUserId: string, referredUserId: string, referralCode: string): Promise<void> {
     // Check if this referral already exists
@@ -197,7 +197,7 @@ export class MongoStorage {
       });
       await referral.save();
     }
-  },
+  }
 
   async createOrder(orderData: any): Promise<any> {
     const order = new Order(orderData);
@@ -234,7 +234,7 @@ export class MongoStorage {
       id: saved._id.toString(),
       amount: saved.amount.toString(),
       utrNumber: saved.utrNumber,
-      paymentMethod: saved.paymentMethod,
+      paymentMethod: payment.paymentMethod,
       status: saved.status,
       createdAt: saved.createdAt.toISOString()
     };
