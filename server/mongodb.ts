@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  hasClaimedDiscount: { type: Boolean, default: false },
   createdAt: {
     type: Date,
     default: Date.now
@@ -405,6 +406,7 @@ export interface IUser {
   password: string;
   walletBalance: number;
   bonusClaimed: boolean;
+  hasClaimedDiscount: boolean;
   createdAt?: Date;
 }
 
@@ -448,3 +450,44 @@ export interface ILoginLog {
   loginCount: number;
   createdAt?: Date;
 }
+
+async function markBonusClaimed(userId: number): Promise<void> {
+    const user = await User.findOne({ id: userId });
+    if (user) {
+      user.bonusClaimed = true;
+      await user.save();
+    }
+  }
+
+  async function getUserReferralData(userId: number): Promise<any> {
+    return await Referral.findOne({ userId });
+  }
+
+  async function createUserReferral(userId: number, referralCode: string): Promise<any> {
+    const referral = new Referral({
+      userId,
+      referralCode
+    });
+    await referral.save();
+    return referral;
+  }
+
+  async function getReferralCount(userId: number): Promise<number> {
+    return await Referral.countDocuments({ 
+      userId, 
+      isCompleted: true 
+    });
+  }
+
+  async function hasClaimedDiscount(userId: number): Promise<boolean> {
+    const user = await User.findOne({ id: userId });
+    return user?.hasClaimedDiscount || false;
+  }
+
+  async function claimDiscountReward(userId: number): Promise<void> {
+    const user = await User.findOne({ id: userId });
+    if (user) {
+      user.hasClaimedDiscount = true;
+      await user.save();
+    }
+  }

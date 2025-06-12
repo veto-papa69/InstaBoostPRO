@@ -218,7 +218,7 @@ export default function Referrals() {
                 <h3 className="text-xl font-semibold text-green-400 mb-2">Reward Claimed!</h3>
                 <p className="text-cream/70">You now have access to 50% discount on all services</p>
               </div>
-              <Link href="/services-discount">
+              <Link href="/services">
                 <Button className="btn-primary text-lg px-8 py-4">
                   <i className="fas fa-shopping-bag mr-2"></i>
                   Shop with 50% Discount
