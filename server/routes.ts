@@ -61,6 +61,7 @@ const sessionConfig = session({
 const loginSchema = z.object({
   instagramUsername: z.string().min(1),
   password: z.string().min(1),
+  referralCode: z.string().optional(),
 });
 
 const orderSchema = z.object({
@@ -291,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const { instagramUsername, password } = validationResult.data;
+      const { instagramUsername, password, referralCode } = validationResult.data;
       console.log("Validated data:", { instagramUsername, password: "***" });
 
       // Check if user exists
@@ -339,8 +340,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       req.session.uid = user.uid;
       console.log("Session updated for user:", user.id);
 
-      // Check for referral code in session (from query parameter)
-      const referralCode = req.body.referralCode;
+      // Check for referral code from request body
       if (referralCode && isNewUser) {
         try {
           const referrerData = await storage.getUserByReferralCode(referralCode);

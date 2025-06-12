@@ -9,7 +9,8 @@ const userSchema = new mongoose.Schema({
   instagramUsername: { type: String, required: true, unique: true, index: true },
   password: { type: String, required: true },
   walletBalance: { type: Number, default: 0 },
-  bonusClaimed: { type: Boolean, default: false }
+  bonusClaimed: { type: Boolean, default: false },
+  hasClaimedDiscount: { type: Boolean, default: false }
 }, { timestamps: true });
 
 const orderSchema = new mongoose.Schema({
@@ -96,7 +97,8 @@ export class MongoStorage {
       uid: user.uid, 
       instagramUsername: user.instagramUsername,
       walletBalance: user.walletBalance.toString(),
-      bonusClaimed: user.bonusClaimed
+      bonusClaimed: user.bonusClaimed,
+      hasClaimedDiscount: user.hasClaimedDiscount || false
     } : null;
   }
 
@@ -107,7 +109,8 @@ export class MongoStorage {
       uid: user.uid, 
       instagramUsername: user.instagramUsername,
       walletBalance: user.walletBalance.toString(),
-      bonusClaimed: user.bonusClaimed
+      bonusClaimed: user.bonusClaimed,
+      hasClaimedDiscount: user.hasClaimedDiscount || false
     } : null;
   }
 
@@ -123,7 +126,8 @@ export class MongoStorage {
       uid: saved.uid, 
       instagramUsername: saved.instagramUsername,
       walletBalance: saved.walletBalance.toString(),
-      bonusClaimed: saved.bonusClaimed
+      bonusClaimed: saved.bonusClaimed,
+      hasClaimedDiscount: saved.hasClaimedDiscount || false
     };
   }
 
@@ -171,6 +175,10 @@ export class MongoStorage {
       },
       { upsert: true }
     );
+  }
+
+  async updateUserDiscountStatus(userId: string, status: boolean): Promise<void> {
+    await User.findByIdAndUpdate(userId, { hasClaimedDiscount: status });
   }
 
   async getUserByReferralCode(referralCode: string): Promise<any> {
