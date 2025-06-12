@@ -63,12 +63,51 @@ if (APP_CONFIG.NODE_ENV === 'production') {
   });
 }
 
-// Start server
+// Start server with error handling
 const PORT = APP_CONFIG.PORT;
-app.listen(PORT, '0.0.0.0', () => {
+
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
   console.log(`🌐 Access at: http://localhost:${PORT}`);
+});
+
+server.on('error', (err: any) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`❌ Port ${PORT} is already in use`);
+    console.log('🔄 Trying to find an available port...');
+    
+    // Try alternative ports
+    const alternativePorts = [5001, 5002, 3000, 8000, 8080];
+    let portFound = false;
+    
+    for (const altPort of alternativePorts) {
+      try {
+        const altServer = app.listen(altPort, '0.0.0.0', () => {
+          console.log(`🚀 Server running on alternative port ${altPort}`);
+          console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
+          console.log(`🌐 Access at: http://localhost:${altPort}`);
+          portFound = true;
+        });
+        
+        altServer.on('error', () => {
+          // Try next port
+        });
+        
+        if (portFound) break;
+      } catch (error) {
+        // Continue to next port
+      }
+    }
+    
+    if (!portFound) {
+      console.error('❌ No available ports found. Please stop other running processes.');
+      process.exit(1);
+    }
+  } else {
+    console.error('❌ Server error:', err);
+    process.exit(1);
+  }
 });
 
 export default app;
