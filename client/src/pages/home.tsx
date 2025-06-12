@@ -183,12 +183,18 @@ export default function Home() {
                 <div className="flex justify-center mb-12">
                   <Button 
                     onClick={handleDiscountReferral}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg px-12 py-4 rounded-xl shadow-lg hover:scale-105 transition-all duration-300 border-2 border-green-400"
-                    style={{ width: 'fit-content', minWidth: '320px' }}
+                    className="discount-button pulse-glow text-xl px-16 py-6 rounded-2xl hover:scale-105 transition-all duration-300"
+                    style={{ 
+                      width: 'fit-content', 
+                      minWidth: '400px',
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      border: '3px solid #34d399',
+                      boxShadow: '0 8px 25px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    }}
                   >
-                    <i className="fas fa-percentage mr-3"></i>
+                    <i className="fas fa-percentage mr-3 text-2xl"></i>
                     Get Flat 50% Discount on Any Order
-                    <i className="fas fa-gift ml-3"></i>
+                    <i className="fas fa-gift ml-3 text-2xl"></i>
                   </Button>
                 </div>
               </div>
