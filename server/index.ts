@@ -73,15 +73,16 @@ process.on('SIGINT', () => {
 
 // Start server with proper error handling
 async function startServer(port: number) {
-  const server = app.listen(port, '0.0.0.0', async () => {
-    // API routes
+  try {
+    // Initialize storage and routes before starting server
     await registerRoutes(app);
-
-    console.log(`🚀 Server running on port ${port}`);
-    console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
-    console.log(`🌐 Access at: http://0.0.0.0:${port}`);
-    console.log(`✅ Server started successfully`);
-  });
+    
+    const server = app.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Server running on port ${port}`);
+      console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
+      console.log(`🌐 Access at: http://0.0.0.0:${port}`);
+      console.log(`✅ Server started successfully`);
+    });
 
   server.on('error', (err: any) => {
     if (err.code === 'EADDRINUSE') {

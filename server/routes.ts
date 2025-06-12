@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { TELEGRAM_CONFIG, APP_CONFIG } from "./config";
 
 // Always use MongoDB storage (no PostgreSQL)
-import { storage } from "./mongo-storage";
+import { storage } from "./mongo-storage.js";
 
 // Force MongoDB for production deployments  
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER_EXTERNAL_URL;
