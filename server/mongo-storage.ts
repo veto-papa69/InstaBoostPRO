@@ -133,7 +133,7 @@ export class MongoStorage {
 
   async markBonusClaimed(userId: string): Promise<void> {
     await User.findByIdAndUpdate(userId, { bonusClaimed: true });
-  },
+  }
 
   // Referral methods
   async getUserReferralData(userId: string): Promise<any> {
