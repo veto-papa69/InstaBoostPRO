@@ -1,39 +1,74 @@
-import { MongoClient } from 'mongodb';
 
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  'mongodb+srv://instaboost_user:uX1YzKjiOETNhyYj@cluster0.tolxjiz.mongodb.net/instaboost?retryWrites=true&w=majority&appName=Cluster0';
+import express from "express";
+import cors from "cors";
+import session from "express-session";
+import path from "path";
+import { fileURLToPath } from "url";
+import { APP_CONFIG } from "./config.js";
+import { routes } from "./routes.js";
+import { MongoDBStorage } from "./mongodb-storage.js";
 
-export async function updateServicePrices() {
-  const client = new MongoClient(MONGODB_URI);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  try {
-    await client.connect();
-    console.log('📦 Connected to MongoDB');
+const app = express();
 
-    const db = client.db('instaboost');
-    const services = db.collection('services');
+// Configure CORS
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
-    const followersUpdate = await services.updateMany(
-      { category: { $regex: /followers/i } },
-      { $inc: { rate: 20 } }
-    );
-    console.log(`✅ Updated ${followersUpdate.modifiedCount} followers services`);
+// Body parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-    const othersUpdate = await services.updateMany(
-      { category: { $regex: /(likes|comments|views)/i } },
-      { $inc: { rate: 10 } }
-    );
-    console.log(`✅ Updated ${othersUpdate.modifiedCount} likes/comments/views services`);
-
-    const updated = await services.find({}).toArray();
-    console.log('📊 Updated Services:\n');
-    updated.forEach((service) =>
-      console.log(`${service.name} (${service.category}) → ₹${service.rate}`)
-    );
-  } catch (err) {
-    console.error('❌ Error updating service prices:', err);
-  } finally {
-    await client.close();
+// Session configuration
+app.use(session({
+  secret: APP_CONFIG.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: false,
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
+}));
+
+// Initialize storage
+const storage = new MongoDBStorage();
+
+// Initialize database on startup
+storage.initializeDatabase().then(() => {
+  console.log('✅ Database initialized successfully');
+}).catch(err => {
+  console.error('❌ Database initialization failed:', err);
+});
+
+// API routes
+app.use('/api', routes(storage));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+// Serve static files in production
+if (APP_CONFIG.NODE_ENV === 'production') {
+  const staticPath = path.join(__dirname, '../dist');
+  app.use(express.static(staticPath));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(staticPath, 'index.html'));
+  });
 }
+
+// Start server
+const PORT = APP_CONFIG.PORT;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
+  console.log(`🌐 Access at: http://localhost:${PORT}`);
+});
+
+export default app;

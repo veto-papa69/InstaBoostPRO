@@ -83,18 +83,6 @@ export default function Home() {
     }
   };
 
-  const handleDiscountReferral = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Login Required",
-        description: "Please login with your Instagram account to access referral discounts.",
-        variant: "destructive",
-      });
-      setIsAuthModalOpen(true);
-    } else {
-      setLocation("/referrals");
-    }
-  };
 
   return (
     <>
