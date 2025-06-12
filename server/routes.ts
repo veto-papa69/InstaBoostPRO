@@ -701,7 +701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const referralCount = await storage.getReferralCount(user.id);
       const isEligibleForDiscount = referralCount >= 5;
-      const hasClaimedDiscount = await storage.hasClaimedDiscount(user.id);
+      const hasClaimedDiscount = user.hasClaimedDiscount || false;
 
       // Create referral link
       const baseUrl = process.env.NODE_ENV === 'production' 
@@ -739,13 +739,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Not enough referrals to claim reward" });
       }
 
-      const hasClaimedDiscount = await storage.hasClaimedDiscount(user.id);
-      if (hasClaimedDiscount) {
+      if (user.hasClaimedDiscount) {
         return res.status(400).json({ error: "Discount already claimed" });
       }
 
-      // Mark discount as claimed
-      await storage.claimDiscountReward(user.id);
+      // Mark discount as claimed in users table
+      await storage.updateUserDiscountStatus(user.id, true);
 
       res.json({ success: true, message: "Discount reward claimed successfully!" });
     } catch (error) {
@@ -760,8 +759,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const hasClaimedDiscount = await storage.hasClaimedDiscount(req.session.userId);
-      res.json(hasClaimedDiscount);
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      res.json(user.hasClaimedDiscount || false);
     } catch (error) {
       console.error("Check discount access error:", error);
       res.status(500).json({ error: "Server error" });

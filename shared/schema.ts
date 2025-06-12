@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).default("0").notNull(),
   bonusClaimed: boolean("bonus_claimed").default(false).notNull(),
+  hasClaimedDiscount: boolean("has_claimed_discount").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
