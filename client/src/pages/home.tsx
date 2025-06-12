@@ -33,15 +33,25 @@ export default function Home() {
 
   const handleDiscountReferral = () => {
     if (!isAuthenticated) {
-      toast({
-        title: "Login Required",
-        description: "Please login with your Instagram account first to access the referral program.",
-        variant: "destructive",
-      });
       setIsAuthModalOpen(true);
-      return;
+    } else {
+      // Check if user has discount access first
+      fetch("/api/referrals/discount-access")
+        .then(res => res.json())
+        .then(hasAccess => {
+          if (hasAccess) {
+            // If user has discount access, go to discount services
+            window.location.href = "/services-discount";
+          } else {
+            // If not, go to referrals page to earn discount
+            window.location.href = "/referrals";
+          }
+        })
+        .catch(() => {
+          // On error, go to referrals page
+          window.location.href = "/referrals";
+        });
     }
-    setLocation("/referrals");
   };
 
   const handleClaimBonus = async () => {

@@ -22,11 +22,11 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/services" component={Services} />
+      <Route path="/services-discount" component={lazy(() => import("./pages/services-discount"))} />
       <Route path="/wallet" component={Wallet} />
       <Route path="/add-funds" component={AddFunds} />
       <Route path="/orders" component={Orders} />
       <Route path="/referrals" component={lazy(() => import("./pages/referrals"))} />
-      <Route path="/services-discount" component={lazy(() => import("./pages/services-discount"))} />
       <Route path="/faq" component={FAQ} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />

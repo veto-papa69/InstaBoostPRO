@@ -84,7 +84,7 @@
   --success-green: #3ccf4e;
   --error-red: #f44336;
   --input-placeholder: #999999;
-  
+
   /* Tailwind variables */
   --background: 14 29 24; /* #0e1d18 */
   --foreground: 244 235 208; /* #f4ebd0 */
@@ -139,40 +139,40 @@
     @apply bg-gradient-to-r from-gold to-tan text-charcoal-dark px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
-  
+
   .btn-primary:hover {
     box-shadow: 0 10px 15px -3px rgba(214, 173, 96, 0.3), 0 4px 6px -2px rgba(214, 173, 96, 0.05);
   }
-  
+
   .btn-outline {
     @apply border-2 border-gold text-gold px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300;
   }
-  
+
   .btn-outline:hover {
     background-color: rgba(214, 173, 96, 0.1);
     box-shadow: 0 10px 15px -3px rgba(214, 173, 96, 0.2), 0 4px 6px -2px rgba(214, 173, 96, 0.05);
   }
-  
+
   .pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
-  
+
   .heartbeat {
     animation: heartbeat 1.5s ease-in-out infinite;
   }
-  
+
   .bonus-card {
     animation: float 3s ease-in-out infinite, glow-pulse 2s ease-in-out infinite;
   }
-  
+
   .bonus-icon {
     animation: bounce-scale 2s ease-in-out infinite;
   }
-  
+
   .nav-link {
     @apply text-cream hover:text-gold transition-colors duration-300 font-medium;
   }
-  
+
   .animate-scroll {
     animation: scroll 15s linear infinite;
   }
@@ -191,55 +191,55 @@
   .text-charcoal-dark {
     color: hsl(var(--charcoal-dark));
   }
-  
+
   .text-charcoal {
     color: hsl(var(--charcoal));
   }
-  
+
   .text-gold {
     color: hsl(var(--gold));
   }
-  
+
   .text-tan {
     color: hsl(var(--tan));
   }
-  
+
   .text-cream {
     color: hsl(var(--cream));
   }
-  
+
   .bg-charcoal-dark {
     background-color: hsl(var(--charcoal-dark));
   }
-  
+
   .bg-charcoal {
     background-color: hsl(var(--charcoal));
   }
-  
+
   .bg-gold {
     background-color: hsl(var(--gold));
   }
-  
+
   .bg-tan {
     background-color: hsl(var(--tan));
   }
-  
+
   .bg-cream {
     background-color: hsl(var(--cream));
   }
-  
+
   .border-gold {
     border-color: hsl(var(--gold));
   }
-  
+
   .from-gold {
     --tw-gradient-from: hsl(var(--gold));
   }
-  
+
   .to-tan {
     --tw-gradient-to: hsl(var(--tan));
   }
-  
+
   .shadow-gold {
     --tw-shadow-color: hsl(var(--gold));
   }
@@ -309,4 +309,24 @@
 
 .animate-shake {
   animation: shake 0.5s ease-in-out;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+}
+
+/* Discount button glow animation */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.8);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }

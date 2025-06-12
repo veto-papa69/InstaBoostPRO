@@ -19,6 +19,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/services", label: "Services", requireAuth: true },
+    { href: "/services-discount", label: "50% Discount", requireAuth: true },
     { href: "/referrals", label: "Referrals", requireAuth: true },
     { href: "/wallet", label: "Wallet", requireAuth: true },
     { href: "/add-funds", label: "Add Funds", requireAuth: true },
