@@ -1,11 +1,10 @@
-
 import express from "express";
 import cors from "cors";
 import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import { APP_CONFIG } from "./config.js";
-import { routes } from "./routes.js";
+import { registerRoutes } from "./routes.js";
 import { MongoDBStorage } from "./mongodb-storage.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,9 +44,7 @@ storage.initializeDatabase().then(() => {
   console.error('❌ Database initialization failed:', err);
 });
 
-// API routes
-app.use('/api', routes(storage));
-
+// Remove this duplicate function since we're importing registerRoutes from routes.js
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
@@ -57,7 +54,7 @@ app.get('/api/health', (req, res) => {
 if (APP_CONFIG.NODE_ENV === 'production') {
   const staticPath = path.join(__dirname, '../dist');
   app.use(express.static(staticPath));
-  
+
   app.get('*', (req, res) => {
     res.sendFile(path.join(staticPath, 'index.html'));
   });
@@ -75,8 +72,11 @@ process.on('SIGINT', () => {
 });
 
 // Start server with proper error handling
-function startServer(port: number) {
-  const server = app.listen(port, '0.0.0.0', () => {
+async function startServer(port: number) {
+  const server = app.listen(port, '0.0.0.0', async () => {
+    // API routes
+    await registerRoutes(app);
+
     console.log(`🚀 Server running on port ${port}`);
     console.log(`📱 Environment: ${APP_CONFIG.NODE_ENV}`);
     console.log(`🌐 Access at: http://0.0.0.0:${port}`);
@@ -87,12 +87,12 @@ function startServer(port: number) {
     if (err.code === 'EADDRINUSE') {
       console.log(`❌ Port ${port} is already in use`);
       console.log('🔄 Trying to kill existing processes...');
-      
+
       // Kill existing processes and retry
       setTimeout(() => {
         const alternativePorts = [5001, 5002, 3001, 3002, 8000, 8080, 4000];
         const nextPort = alternativePorts.find(p => p !== port) || 5001;
-        
+
         console.log(`🔄 Trying port ${nextPort}...`);
         startServer(nextPort);
       }, 1000);
