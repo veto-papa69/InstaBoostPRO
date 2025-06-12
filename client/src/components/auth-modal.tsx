@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useState } from 'react';
 
 const loginSchema = z.object({
   instagramUsername: z.string().min(1, "Instagram username is required"),
@@ -37,6 +38,12 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalProps) {
   const { toast } = useToast();
   const login = useLogin();
+
+  const [formData, setFormData] = useState({
+    instagramUsername: "",
+    password: "",
+    referralCode: sessionStorage.getItem('referralCode') || "",
+  });
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),

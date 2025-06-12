@@ -179,24 +179,55 @@ export default function Home() {
                   </Link>
                 </div>
 
-                {/* Discount Referral Button */}
+                {/* Premium Discount Referral Button */}
                 <div className="flex justify-center mb-12">
                   <Button 
                     onClick={handleDiscountReferral}
-                    className="discount-button pulse-glow text-xl px-16 py-6 rounded-2xl hover:scale-105 transition-all duration-300"
+                    className="premium-discount-button group relative overflow-hidden text-2xl px-20 py-8 rounded-3xl hover:scale-110 transition-all duration-500 transform-gpu"
                     style={{ 
                       width: 'fit-content', 
-                      minWidth: '400px',
-                      background: 'linear-gradient(135deg, #10b981, #059669)',
-                      border: '3px solid #34d399',
-                      boxShadow: '0 8px 25px rgba(34, 197, 94, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                      minWidth: '450px',
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%)',
+                      backgroundSize: '400% 400%',
+                      border: '4px solid transparent',
+                      borderImage: 'linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57) 1',
+                      boxShadow: '0 15px 35px rgba(102, 126, 234, 0.6), 0 5px 15px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                      animation: 'gradientShift 3s ease infinite, pulseGlow 2s ease-in-out infinite alternate'
                     }}
                   >
-                    <i className="fas fa-percentage mr-3 text-2xl"></i>
-                    Get Flat 50% Discount on Any Order
-                    <i className="fas fa-gift ml-3 text-2xl"></i>
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                    <div className="relative z-10 flex items-center justify-center">
+                      <i className="fas fa-star mr-4 text-3xl animate-spin-slow text-yellow-300"></i>
+                      <span className="font-black text-white drop-shadow-lg">
+                        Get 50% Flat Discount
+                      </span>
+                      <i className="fas fa-gift ml-4 text-3xl animate-bounce text-pink-300"></i>
+                    </div>
+                    <div className="absolute -top-1 -left-1 -right-1 -bottom-1 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 rounded-3xl opacity-75 group-hover:opacity-100 transition-opacity duration-300 -z-10 animate-pulse"></div>
                   </Button>
                 </div>
+
+                <style jsx>{`
+                  @keyframes gradientShift {
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
+                  }
+                  
+                  @keyframes pulseGlow {
+                    0% { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6), 0 5px 15px rgba(0, 0, 0, 0.12); }
+                    100% { box-shadow: 0 20px 40px rgba(102, 126, 234, 0.8), 0 8px 20px rgba(0, 0, 0, 0.15); }
+                  }
+                  
+                  @keyframes spin-slow {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                  }
+                  
+                  .animate-spin-slow {
+                    animation: spin-slow 3s linear infinite;
+                  }
+                `}</style>
               </div>
             </div>
 
