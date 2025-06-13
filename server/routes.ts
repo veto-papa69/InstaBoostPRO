@@ -277,6 +277,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('⚠️ Telegram webhook setup failed (this is normal if no token provided)');
   }
 
+  // Referral code validation endpoint
+  app.post("/api/validate-referral", async (req, res) => {
+    try {
+      const { referralCode } = req.body;
+      
+      if (!referralCode || !referralCode.startsWith('REF-')) {
+        return res.status(400).json({ error: "Invalid referral code format" });
+      }
+
+      const referralRecord = await storage.getReferralByCode(referralCode);
+      
+      if (!referralRecord) {
+        return res.status(400).json({ error: "Referral code not found" });
+      }
+
+      res.json({ valid: true, message: "Referral code is valid" });
+    } catch (error) {
+      console.error("Referral validation error:", error);
+      res.status(500).json({ error: "Failed to validate referral code" });
+    }
+  });
+
   // Auth endpoints
   app.post("/api/auth/login", async (req: AuthenticatedRequest, res: Response) => {
     try {
