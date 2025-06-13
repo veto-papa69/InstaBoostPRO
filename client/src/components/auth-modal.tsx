@@ -149,6 +149,31 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium" style={{ color: 'var(--primary-text)' }}>
+                      Referral Code (Optional)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        placeholder="Referral Code"
+                        style={{ 
+                          backgroundColor: 'var(--main-bg)', 
+                          borderColor: 'var(--gold)', 
+                          color: 'var(--primary-text)' 
+                        }}
+                        className="focus:border-2"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="rounded-lg p-4" style={{ backgroundColor: 'rgba(214, 173, 96, 0.1)', borderColor: 'var(--gold)' }}>
                 <div className="flex items-start space-x-3">
