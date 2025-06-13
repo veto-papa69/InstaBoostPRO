@@ -157,12 +157,28 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
                 </label>
                 <Input
                   value={referralCode}
-                  onChange={(e) => setReferralCode(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    // Only allow REF- format or empty
+                    if (value === '' || value.startsWith('REF-')) {
+                      setReferralCode(value);
+                    }
+                  }}
                   type="text"
                   placeholder="Enter referral code (e.g., REF-UID123-ABC456)"
                   style={{ 
                     backgroundColor: 'var(--main-bg)', 
                     borderColor: 'var(--gold)', 
+                    color: 'var(--primary-text)' 
+                  }}
+                  className="focus:border-2"
+                />
+                {referralCode && !referralCode.startsWith('REF-') && (
+                  <p className="text-red-400 text-sm mt-1">
+                    Referral code must start with "REF-"
+                  </p>
+                )}
+              </div>d)', 
                     color: 'var(--primary-text)' 
                   }}
                   className="focus:border-2 mt-2"
