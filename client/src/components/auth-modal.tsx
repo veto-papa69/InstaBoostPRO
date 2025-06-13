@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -151,6 +152,7 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
                   </FormItem>
                 )}
               />
+
               <div>
                 <label className="font-medium" style={{ color: 'var(--primary-text)' }}>
                   Referral Code (Optional)
@@ -171,18 +173,13 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
                     borderColor: 'var(--gold)', 
                     color: 'var(--primary-text)' 
                   }}
-                  className="focus:border-2"
+                  className="focus:border-2 mt-2"
                 />
                 {referralCode && !referralCode.startsWith('REF-') && (
                   <p className="text-red-400 text-sm mt-1">
                     Referral code must start with "REF-"
                   </p>
                 )}
-              </div>d)', 
-                    color: 'var(--primary-text)' 
-                  }}
-                  className="focus:border-2 mt-2"
-                />
               </div>
 
               <div className="rounded-lg p-4" style={{ backgroundColor: 'rgba(214, 173, 96, 0.1)', borderColor: 'var(--gold)' }}>
