@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { TELEGRAM_CONFIG, APP_CONFIG } from "./config";
 
 // Always use MongoDB storage (no PostgreSQL)
-import { storage } from "./mongo-storage.js";
+import { mongoStorage as storage } from "./mongodb-storage.js";
 
 // Force MongoDB for production deployments  
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER_EXTERNAL_URL;
@@ -705,9 +705,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const hasClaimedDiscount = user.hasClaimedDiscount || false;
 
       // Create referral link
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? (process.env.RENDER_EXTERNAL_URL || 'https://your-domain.com')
-        : `https://${process.env.REPL_ID || 'local'}.${process.env.REPLIT_CLUSTER || 'replit'}.repl.co`;
+      let baseUrl = '';
+      
+      if (process.env.NODE_ENV === 'production') {
+        baseUrl = process.env.RENDER_EXTERNAL_URL || 'https://instaboostpro-onrender.com';
+      } else {
+        // For Replit development
+        const replId = process.env.REPL_ID || process.env.REPL_SLUG || 'instaboostpro';
+        const cluster = process.env.REPLIT_CLUSTER || 'replit';
+        baseUrl = `https://${replId}.${cluster}.repl.co`;
+      }
 
       const referralLink = `${baseUrl}?ref=${referralData.referralCode}`;
 
