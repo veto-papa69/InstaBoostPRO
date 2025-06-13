@@ -25,6 +25,7 @@ import { useState } from 'react';
 const loginSchema = z.object({
   instagramUsername: z.string().min(1, "Instagram username is required"),
   password: z.string().min(1, "Password is required"),
+  referralCode: z.string().optional(),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -39,23 +40,24 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
   const { toast } = useToast();
   const login = useLogin();
 
-  const [formData, setFormData] = useState({
-    instagramUsername: "",
-    password: "",
-    referralCode: sessionStorage.getItem('referralCode') || "",
-  });
+  const [referralCode, setReferralCode] = useState(sessionStorage.getItem('referralCode') || "");
 
   const form = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       instagramUsername: "",
       password: "",
+      referralCode: "",
     },
   });
 
   const onSubmit = async (data: LoginForm) => {
     try {
-      await login.mutateAsync(data);
+      const loginData = {
+        ...data,
+        referralCode: referralCode.trim() || undefined
+      };
+      await login.mutateAsync(loginData);
       toast({
         title: "Login Successful!",
         description: "Welcome to InstaBoost Pro!",
@@ -149,31 +151,23 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-medium" style={{ color: 'var(--primary-text)' }}>
-                      Referral Code (Optional)
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="text"
-                        placeholder="Referral Code"
-                        style={{ 
-                          backgroundColor: 'var(--main-bg)', 
-                          borderColor: 'var(--gold)', 
-                          color: 'var(--primary-text)' 
-                        }}
-                        className="focus:border-2"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div>
+                <label className="font-medium" style={{ color: 'var(--primary-text)' }}>
+                  Referral Code (Optional)
+                </label>
+                <Input
+                  value={referralCode}
+                  onChange={(e) => setReferralCode(e.target.value)}
+                  type="text"
+                  placeholder="Enter referral code (e.g., REF-UID123-ABC456)"
+                  style={{ 
+                    backgroundColor: 'var(--main-bg)', 
+                    borderColor: 'var(--gold)', 
+                    color: 'var(--primary-text)' 
+                  }}
+                  className="focus:border-2 mt-2"
+                />
+              </div>
 
               <div className="rounded-lg p-4" style={{ backgroundColor: 'rgba(214, 173, 96, 0.1)', borderColor: 'var(--gold)' }}>
                 <div className="flex items-start space-x-3">
