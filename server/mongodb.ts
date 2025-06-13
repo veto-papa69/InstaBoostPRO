@@ -174,12 +174,17 @@ const loginLogSchema = new mongoose.Schema({
 });
 
 const referralSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: String, required: true },
   referralCode: { type: String, required: true, unique: true },
-  referredUserId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  referredUserId: { type: String },
   isCompleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
+
+// Add indexes for better performance
+referralSchema.index({ referralCode: 1 });
+referralSchema.index({ userId: 1 });
+referralSchema.index({ referredUserId: 1 });
 
 const discountRewardSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
