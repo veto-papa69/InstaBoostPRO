@@ -243,12 +243,9 @@ export class MongoDBStorage implements IMongoStorage {
   }
 
   // Referral methods
-  async getUserReferralData(userId: string): Promise<any> {
+  async getUserReferralData(userId: string) {
     try {
-      await this.initializeDatabase(); // Ensure DB is connected
-      const { Referral } = await import('./mongodb');
-
-      console.log('🔍 Getting referral data for userId:', userId);
+      console.log('📋 Getting referral data for user:', userId);
 
       // First check if user has any referral code (as referrer) - only check for main referral code, not used ones
       let referral = await Referral.findOne({ 
@@ -276,19 +273,35 @@ export class MongoDBStorage implements IMongoStorage {
         }
       }
 
+      // Get count of referred users
+      const referredCount = await Referral.countDocuments({
+        referralCode: referral?.referralCode,
+        referredUserId: { $exists: true },
+        isCompleted: true
+      });
+
       const result = referral ? {
         id: referral._id.toString(),
-        userId: referral.userId,
         referralCode: referral.referralCode,
-        referredUserId: referral.referredUserId,
-        isCompleted: referral.isCompleted
-      } : null;
+        referredCount: referredCount,
+        totalEarnings: (referredCount * 5).toFixed(2) // $5 per referral
+      } : {
+        id: '',
+        referralCode: 'Code not available',
+        referredCount: 0,
+        totalEarnings: '0.00'
+      };
 
       console.log('📤 Returning referral data:', result);
       return result;
     } catch (error) {
       console.error('Error getting user referral data:', error);
-      return null;
+      return {
+        id: '',
+        referralCode: 'Code not available',
+        referredCount: 0,
+        totalEarnings: '0.00'
+      };
     }
   }
 
