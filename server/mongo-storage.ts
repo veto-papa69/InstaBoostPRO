@@ -320,7 +320,19 @@ export class MongoDBStorage {
   async getReferralCount(userId: string): Promise<number> {
     return await Referral.countDocuments({ 
       userId, 
-      isCompleted: true 
+      isCompleted: true
+    });
+  }
+
+  async getReferralByCode(referralCode: string): Promise<any> {
+    const referral = await Referral.findOne({ referralCode });
+    return referral ? {
+      id: referral._id.toString(),
+      userId: referral.userId,
+      referralCode: referral.referralCode,
+      referredUserId: referral.referredUserId,
+      isCompleted: referral.isCompleted
+    } : null;e 
     });
   }
 
