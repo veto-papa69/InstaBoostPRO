@@ -1,3 +1,4 @@
+
 import mongoose from 'mongoose';
 
 // MongoDB connection string
@@ -54,13 +55,44 @@ const referralSchema = new mongoose.Schema({
   isCompleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// Create models only if they don't exist to prevent overwrite errors
-const User = mongoose.models.User || mongoose.model('User', userSchema);
-const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
-const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
-const Service = mongoose.models.Service || mongoose.model('Service', serviceSchema);
-const LoginLog = mongoose.models.LoginLog || mongoose.model('LoginLog', loginLogSchema);
-const Referral = mongoose.models.Referral || mongoose.model('Referral', referralSchema);
+// Check if models exist before creating them
+let User, Order, Payment, Service, LoginLog, Referral;
+
+try {
+  User = mongoose.model('User');
+} catch {
+  User = mongoose.model('User', userSchema);
+}
+
+try {
+  Order = mongoose.model('Order');
+} catch {
+  Order = mongoose.model('Order', orderSchema);
+}
+
+try {
+  Payment = mongoose.model('Payment');
+} catch {
+  Payment = mongoose.model('Payment', paymentSchema);
+}
+
+try {
+  Service = mongoose.model('Service');
+} catch {
+  Service = mongoose.model('Service', serviceSchema);
+}
+
+try {
+  LoginLog = mongoose.model('LoginLog');
+} catch {
+  LoginLog = mongoose.model('LoginLog', loginLogSchema);
+}
+
+try {
+  Referral = mongoose.model('Referral');
+} catch {
+  Referral = mongoose.model('Referral', referralSchema);
+}
 
 // Storage implementation
 export class MongoDBStorage {
