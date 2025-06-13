@@ -12,6 +12,7 @@ interface User {
 interface LoginData {
   instagramUsername: string;
   password: string;
+  referralCode?: string;
 }
 
 export function useAuth() {
