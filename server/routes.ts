@@ -281,13 +281,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/validate-referral", async (req, res) => {
     try {
       const { referralCode } = req.body;
-      
+
       if (!referralCode || !referralCode.startsWith('REF-')) {
         return res.status(400).json({ error: "Invalid referral code format" });
       }
 
       const referralRecord = await storage.getReferralByCode(referralCode);
-      
+
       if (!referralRecord) {
         return res.status(400).json({ error: "Referral code not found" });
       }
@@ -738,10 +738,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Referral endpoints
-  app.get("/api/referrals", async (req, res) => {
+  app.get("/api/referrals", async (req: AuthenticatedRequest, res: Response) => {
     // Ensure we always return JSON
     res.setHeader('Content-Type', 'application/json');
-    
+
     if (!req.session.userId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
@@ -757,10 +757,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("👤 User found:", user.uid);
 
       // Create referral code if needed
-      const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-      
+      let referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      let referralRecord = await storage.getReferralByUserId(user.id);
+
+      if (!referralRecord) {
+        referralRecord = await storage.createReferral({
+          userId: user.id,
+          referralCode: referralCode
+        });
+        console.log("Created referral record", referralRecord);
+      } else {
+        referralCode = referralRecord.referralCode;
+      }
+
       // Get referral count (simplified)
-      const referralCount = 0; // Default for now
+      const referralCount = await storage.getReferralCount(user.id);
       const isEligibleForDiscount = referralCount >= 5;
       const hasClaimedDiscount = user.hasClaimedDiscount || false;
 
