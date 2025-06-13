@@ -732,25 +732,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("📊 Referral count:", referralCount);
 
-      // Create referral link
-      let baseUrl = '';
-      
-      if (process.env.NODE_ENV === 'production') {
-        baseUrl = process.env.RENDER_EXTERNAL_URL || 'https://instaboostpro-onrender.com';
-      } else {
-        // For Replit development
-        const replId = process.env.REPL_ID || process.env.REPL_SLUG || 'instaboostpro';
-        const cluster = process.env.REPLIT_CLUSTER || 'replit';
-        baseUrl = `https://${replId}.${cluster}.repl.co`;
-      }
-
-      const referralLink = `${baseUrl}?ref=${referralData.referralCode}`;
-
-      console.log("🔗 Generated referral link:", referralLink);
+      console.log("🎯 Generated referral code:", referralData.referralCode);
 
       res.json({
         referralCode: referralData.referralCode,
-        referralLink,
         referralCount,
         isEligibleForDiscount,
         hasClaimedDiscount,
