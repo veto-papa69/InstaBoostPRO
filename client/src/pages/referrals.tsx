@@ -8,7 +8,6 @@ import { Link } from "wouter";
 
 interface ReferralData {
   referralCode: string;
-  referralLink: string;
   referralCount: number;
   isEligibleForDiscount: boolean;
   hasClaimedDiscount: boolean;
@@ -78,17 +77,7 @@ export default function Referrals() {
     );
   }
 
-  const copyReferralLink = () => {
-    if (referralData?.referralLink) {
-      navigator.clipboard.writeText(referralData.referralLink);
-      setCopiedLink(true);
-      toast({
-        title: "Link Copied!",
-        description: "Referral link copied to clipboard",
-      });
-      setTimeout(() => setCopiedLink(false), 3000);
-    }
-  };
+  
 
   const handleClaimReward = () => {
     claimRewardMutation.mutate();
@@ -298,30 +287,43 @@ export default function Referrals() {
             </div>
           </div>
 
-          {/* Referral Link Section */}
+          {/* Referral Code Section */}
           <div className="bg-charcoal border border-gold/20 rounded-2xl p-10 mb-16 shadow-xl">
             <h3 className="text-3xl font-bold text-gold mb-8 flex items-center">
-              <i className="fas fa-link mr-3"></i>
-              Your Referral Link
+              <i className="fas fa-code mr-3"></i>
+              Your Referral Code
             </h3>
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
-                <div className="text-cream/70 text-lg mb-3 font-medium">Share this magic link:</div>
-                <div className="text-cream font-mono text-base break-all bg-black/30 p-4 rounded-lg border max-h-20 overflow-y-auto">
-                  {referralData?.referralLink ? (
-                    <span className="select-all">{referralData.referralLink}</span>
+                <div className="text-cream/70 text-lg mb-3 font-medium">Share this referral code:</div>
+                <div className="text-cream font-mono text-2xl break-all bg-black/30 p-6 rounded-lg border text-center">
+                  {referralData?.referralCode ? (
+                    <span className="select-all text-gold font-bold">{referralData.referralCode}</span>
                   ) : (
-                    <span className="text-cream/50 animate-pulse">Loading your personalized link...</span>
+                    <span className="text-cream/50 animate-pulse">Generating your code...</span>
                   )}
+                </div>
+                <div className="text-cream/50 text-sm mt-3 text-center">
+                  Friends can use this code during registration
                 </div>
               </div>
               <Button 
-                onClick={copyReferralLink}
+                onClick={() => {
+                  if (referralData?.referralCode) {
+                    navigator.clipboard.writeText(referralData.referralCode);
+                    setCopiedLink(true);
+                    toast({
+                      title: "Code Copied!",
+                      description: "Referral code copied to clipboard",
+                    });
+                    setTimeout(() => setCopiedLink(false), 3000);
+                  }
+                }}
                 className={`btn-primary text-xl px-10 py-6 self-start lg:self-center whitespace-nowrap transform hover:scale-105 transition-all duration-300 ${copiedLink ? 'bg-green-500 hover:bg-green-600' : ''}`}
-                disabled={!referralData?.referralLink}
+                disabled={!referralData?.referralCode}
               >
                 <i className={`fas ${copiedLink ? 'fa-check' : 'fa-copy'} mr-3 text-xl`}></i>
-                {copiedLink ? 'Copied!' : 'Copy Link'}
+                {copiedLink ? 'Copied!' : 'Copy Code'}
               </Button>
             </div>
           </div>
