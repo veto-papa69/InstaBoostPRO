@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 
 // MongoDB connection string
@@ -55,7 +54,7 @@ const referralSchema = new mongoose.Schema({
   isCompleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// Create models only if they don't exist
+// Create models only if they don't exist to prevent overwrite errors
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
 const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
@@ -332,8 +331,7 @@ export class MongoDBStorage {
       referralCode: referral.referralCode,
       referredUserId: referral.referredUserId,
       isCompleted: referral.isCompleted
-    } : null;e 
-    });
+    } : null;
   }
 
   async getUserByReferralCode(referralCode: string): Promise<any> {
