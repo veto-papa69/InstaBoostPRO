@@ -41,6 +41,10 @@ export interface IMongoStorage {
   // Login tracking operations
   logUserLogin(userId: string, instagramUsername: string): Promise<number>;
   getUserLoginCount(userId: string): Promise<number>;
+
+  // Referral methods
+  getUserReferralData(userId: string): Promise<any>;
+  getReferralCount(userId: string): Promise<number>;
 }
 
 export class MongoDBStorage implements IMongoStorage {
@@ -397,6 +401,17 @@ export class MongoDBStorage implements IMongoStorage {
       console.error('Error updating user discount status:', error);
       throw error;
     }
+  }
+
+  async getUserReferralData(userId: string): Promise<any> {
+    // For now, return null to trigger fallback code creation
+    return null;
+  }
+
+  async getReferralCount(userId: string): Promise<number> {
+    // Count referrals where this user is the referrer
+    const count = await Referral.countDocuments({ userId });
+    return count;
   }
 }
 
