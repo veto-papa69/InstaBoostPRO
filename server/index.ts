@@ -4,7 +4,7 @@ import session from "express-session";
 import path from "path";
 import { fileURLToPath } from "url";
 import { APP_CONFIG } from "./config.js";
-import { registerRoutes } from "./routes";
+import { registerRoutes } from "./routes.js";
 import { MongoDBStorage } from "./mongodb-storage.js";
 
 const __filename = fileURLToPath(import.meta.url);
