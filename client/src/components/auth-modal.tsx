@@ -42,7 +42,6 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
 
   const [instagramUsername, setInstagramUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [referralCode, setReferralCode] = useState("");
   const [referralCodeValid, setReferralCodeValid] = useState<boolean | null>(null);
   const [referralOwner, setReferralOwner] = useState("");
   const [isLogin, setIsLogin] = useState(true);
