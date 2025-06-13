@@ -112,60 +112,62 @@ export default function Referrals() {
           {/* Achievement Level Badge */}
           <div className="text-center mb-12">
             {(referralData?.referralCount || 0) >= 5 ? (
-              <div className="inline-flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-8 py-4 rounded-full font-bold text-xl animate-pulse shadow-lg">
-                <i className="fas fa-crown mr-3 text-2xl"></i>
-                MASTER REFERRER
-                <i className="fas fa-star ml-3 text-2xl"></i>
+              <div className="inline-flex items-center bg-gradient-to-r from-yellow-400 to-orange-500 text-black px-6 py-3 rounded-full font-bold text-lg animate-pulse shadow-lg max-w-xs mx-auto">
+                <i className="fas fa-crown mr-2 text-xl"></i>
+                <span className="truncate">MASTER REFERRER</span>
+                <i className="fas fa-star ml-2 text-xl"></i>
               </div>
             ) : (referralData?.referralCount || 0) >= 3 ? (
-              <div className="inline-flex items-center bg-gradient-to-r from-purple-400 to-pink-500 text-white px-8 py-4 rounded-full font-bold text-xl shadow-lg">
-                <i className="fas fa-star mr-3"></i>
-                EXPERT LEVEL
+              <div className="inline-flex items-center bg-gradient-to-r from-purple-400 to-pink-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg max-w-xs mx-auto">
+                <i className="fas fa-star mr-2"></i>
+                <span className="truncate">EXPERT LEVEL</span>
               </div>
             ) : (referralData?.referralCount || 0) >= 1 ? (
-              <div className="inline-flex items-center bg-gradient-to-r from-blue-400 to-green-500 text-white px-8 py-4 rounded-full font-bold text-xl shadow-lg">
-                <i className="fas fa-medal mr-3"></i>
-                ROOKIE LEVEL
+              <div className="inline-flex items-center bg-gradient-to-r from-blue-400 to-green-500 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg max-w-xs mx-auto">
+                <i className="fas fa-medal mr-2"></i>
+                <span className="truncate">ROOKIE LEVEL</span>
               </div>
             ) : (
-              <div className="inline-flex items-center bg-gray-600 text-white px-8 py-4 rounded-full font-bold text-xl shadow-lg">
-                <i className="fas fa-user mr-3"></i>
-                BEGINNER
+              <div className="inline-flex items-center bg-gray-600 text-white px-6 py-3 rounded-full font-bold text-lg shadow-lg max-w-xs mx-auto">
+                <i className="fas fa-user mr-2"></i>
+                <span className="truncate">BEGINNER</span>
               </div>
             )}
           </div>
 
           {/* Stats Cards */}
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <div className="bg-charcoal border-2 border-gold/30 rounded-2xl p-8 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
-              <div className="text-6xl font-bold text-gold mb-4 flex items-center justify-center">
-                <i className="fas fa-users mr-3 text-4xl"></i>
-                {referralData?.referralCount || 0}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <div className="bg-charcoal border-2 border-gold/30 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
+              <div className="flex items-center justify-center mb-4">
+                <i className="fas fa-users text-3xl text-gold mr-3"></i>
+                <span className="text-4xl font-bold text-gold">{referralData?.referralCount || 0}</span>
               </div>
-              <div className="text-xl text-cream font-semibold mb-2">Successful Referrals</div>
-              <div className="text-gold font-medium">
+              <div className="text-lg text-cream font-semibold mb-2">Successful Referrals</div>
+              <div className="text-gold font-medium text-sm">
                 {(referralData?.referralCount || 0) * 20}% Progress to Reward
               </div>
             </div>
 
-            <div className="bg-charcoal border-2 border-green-400/30 rounded-2xl p-8 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
-              <div className="text-6xl font-bold text-green-400 mb-4 flex items-center justify-center">
-                <i className="fas fa-target mr-3 text-4xl"></i>
-                {5 - (referralData?.referralCount || 0) > 0 ? 5 - (referralData?.referralCount || 0) : 0}
+            <div className="bg-charcoal border-2 border-green-400/30 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
+              <div className="flex items-center justify-center mb-4">
+                <i className="fas fa-target text-3xl text-green-400 mr-3"></i>
+                <span className="text-4xl font-bold text-green-400">
+                  {5 - (referralData?.referralCount || 0) > 0 ? 5 - (referralData?.referralCount || 0) : 0}
+                </span>
               </div>
-              <div className="text-xl text-cream font-semibold mb-2">Referrals Needed</div>
-              <div className="text-green-400 font-medium">
+              <div className="text-lg text-cream font-semibold mb-2">Referrals Needed</div>
+              <div className="text-green-400 font-medium text-sm">
                 {(referralData?.referralCount || 0) >= 5 ? "🎯 Goal Achieved!" : "Keep Going!"}
               </div>
             </div>
 
-            <div className="bg-charcoal border-2 border-purple-400/30 rounded-2xl p-8 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
-              <div className="text-6xl font-bold text-purple-400 mb-4 flex items-center justify-center">
-                <i className="fas fa-percentage mr-3 text-4xl"></i>
-                50
+            <div className="bg-charcoal border-2 border-purple-400/30 rounded-2xl p-6 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
+              <div className="flex items-center justify-center mb-4">
+                <i className="fas fa-percentage text-3xl text-purple-400 mr-3"></i>
+                <span className="text-4xl font-bold text-purple-400">50</span>
               </div>
-              <div className="text-xl text-cream font-semibold mb-2">Discount Reward</div>
-              <div className="text-purple-400 font-medium">
+              <div className="text-lg text-cream font-semibold mb-2">Discount Reward</div>
+              <div className="text-purple-400 font-medium text-sm">
                 {(referralData?.referralCount || 0) >= 5 ? "🎁 Unlocked!" : "So Close!"}
               </div>
             </div>
@@ -184,10 +186,10 @@ export default function Referrals() {
             </div>
 
             {/* Enhanced Progress Bar */}
-            <div className="relative mb-12">
-              <div className="w-full bg-charcoal-dark rounded-full h-8 shadow-inner border border-gray-600">
+            <div className="relative mb-20">
+              <div className="w-full bg-charcoal-dark rounded-full h-6 shadow-inner border border-gray-600">
                 <div 
-                  className="bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 h-8 rounded-full transition-all duration-1000 ease-out relative overflow-hidden shadow-lg"
+                  className="bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 h-6 rounded-full transition-all duration-1000 ease-out relative overflow-hidden shadow-lg"
                   style={{ width: `${((referralData?.referralCount || 0) / 5) * 100}%` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent animate-pulse"></div>
@@ -195,35 +197,69 @@ export default function Referrals() {
               </div>
 
               {/* Milestone Markers */}
-              <div className="absolute -top-2 left-0 w-full h-12 flex justify-between items-center">
-                {[1, 2, 3, 4, 5].map((milestone) => (
-                  <div 
-                    key={milestone}
-                    className={`relative flex items-center justify-center w-12 h-12 rounded-full border-4 transition-all duration-500 transform ${
-                      (referralData?.referralCount || 0) >= milestone
-                        ? 'bg-green-500 border-green-300 text-white scale-110 shadow-lg'
-                        : 'bg-charcoal-dark border-gray-500 text-gray-400'
-                    }`}
-                    style={{ left: `${((milestone - 1) / 4) * 100}%`, transform: 'translateX(-50%) scale(1)' }}
-                  >
-                    {(referralData?.referralCount || 0) >= milestone ? (
-                      <i className="fas fa-check text-lg"></i>
-                    ) : (
-                      <span className="text-sm font-bold">{milestone}</span>
-                    )}
+              <div className="relative mt-4">
+                <div className="flex justify-between items-start">
+                  {[1, 2, 3, 4, 5].map((milestone) => (
+                    <div 
+                      key={milestone}
+                      className="flex flex-col items-center text-center"
+                      style={{ width: '20%' }}
+                    >
+                      {/* Circle */}
+                      <div 
+                        className={`flex items-center justify-center w-10 h-10 rounded-full border-3 transition-all duration-500 mb-3 ${
+                          (referralData?.referralCount || 0) >= milestone
+                            ? 'bg-green-500 border-green-300 text-white shadow-lg scale-110'
+                            : 'bg-charcoal-dark border-gray-500 text-gray-400'
+                        }`}
+                      >
+                        {(referralData?.referralCount || 0) >= milestone ? (
+                          <i className="fas fa-check text-sm"></i>
+                        ) : (
+                          <span className="text-xs font-bold">{milestone}</span>
+                        )}
+                      </div>
 
-                    {/* Milestone Labels */}
-                    <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-center whitespace-nowrap">
-                      <div className={`text-sm font-semibold ${(referralData?.referralCount || 0) >= milestone ? 'text-green-400' : 'text-gray-500'}`}>
-                        {milestone === 1 && '🎯 First Friend'}
-                        {milestone === 2 && '⚡ Building Momentum'}
-                        {milestone === 3 && '🔥 Halfway Champion'}
-                        {milestone === 4 && '💎 Almost There'}
-                        {milestone === 5 && '🏆 Reward Master'}
+                      {/* Milestone Labels */}
+                      <div className={`text-xs font-semibold px-2 leading-tight ${(referralData?.referralCount || 0) >= milestone ? 'text-green-400' : 'text-gray-500'}`}>
+                        {milestone === 1 && (
+                          <div className="flex flex-col items-center">
+                            <span>🎯</span>
+                            <span>First Friend</span>
+                          </div>
+                        )}
+                        {milestone === 2 && (
+                          <div className="flex flex-col items-center">
+                            <span>⚡</span>
+                            <span>Building</span>
+                            <span>Momentum</span>
+                          </div>
+                        )}
+                        {milestone === 3 && (
+                          <div className="flex flex-col items-center">
+                            <span>🔥</span>
+                            <span>Halfway</span>
+                            <span>Champion</span>
+                          </div>
+                        )}
+                        {milestone === 4 && (
+                          <div className="flex flex-col items-center">
+                            <span>💎</span>
+                            <span>Almost</span>
+                            <span>There</span>
+                          </div>
+                        )}
+                        {milestone === 5 && (
+                          <div className="flex flex-col items-center">
+                            <span>🏆</span>
+                            <span>Reward</span>
+                            <span>Master</span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
