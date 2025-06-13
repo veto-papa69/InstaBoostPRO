@@ -182,7 +182,7 @@ export default function Home() {
                 {/* Premium Discount Referral Button */}
                 <div className="flex justify-center mb-12">
                   <Button 
-                    onClick={handleDiscountReferral}
+                    onClick={() => window.location.href = "/referrals"}
                     className="premium-discount-button group relative overflow-hidden text-2xl px-20 py-8 rounded-3xl hover:scale-110 transition-all duration-500 transform-gpu"
                     style={{ 
                       width: 'fit-content', 
