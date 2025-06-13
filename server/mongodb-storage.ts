@@ -244,14 +244,24 @@ export class MongoDBStorage implements IMongoStorage {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
       
-      // First check if user has any referral code (as referrer)
-      let referral = await Referral.findOne({ userId }).lean();
+      console.log('🔍 Getting referral data for userId:', userId);
+      
+      // First check if user has any referral code (as referrer) - only check for main referral code, not used ones
+      let referral = await Referral.findOne({ 
+        userId, 
+        referralCode: { $regex: /^REF-/ },
+        referredUserId: { $exists: false }
+      }).lean();
+      
+      console.log('📋 Found existing referral:', referral);
       
       if (!referral) {
         // If no referral found, create one automatically
         const user = await this.getUser(userId);
         if (user) {
           const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+          console.log('🎯 Creating new referral code:', referralCode);
+          
           const newReferral = new Referral({
             userId,
             referralCode,
@@ -259,16 +269,20 @@ export class MongoDBStorage implements IMongoStorage {
           });
           await newReferral.save();
           referral = newReferral.toObject();
+          console.log('✅ New referral created successfully');
         }
       }
       
-      return referral ? {
+      const result = referral ? {
         id: referral._id.toString(),
         userId: referral.userId,
         referralCode: referral.referralCode,
         referredUserId: referral.referredUserId,
         isCompleted: referral.isCompleted
       } : null;
+      
+      console.log('📤 Returning referral data:', result);
+      return result;
     } catch (error) {
       console.error('Error getting user referral data:', error);
       return null;
@@ -309,10 +323,16 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      return await Referral.countDocuments({ 
+      
+      // Count only the referrals where this user referred someone else
+      const count = await Referral.countDocuments({ 
         userId, 
-        isCompleted: true
+        isCompleted: true,
+        referredUserId: { $exists: true }
       });
+      
+      console.log('📊 Referral count for user', userId, ':', count);
+      return count;
     } catch (error) {
       console.error('Error getting referral count:', error);
       return 0;
@@ -323,7 +343,18 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      const referral = await Referral.findOne({ referralCode }).lean();
+      
+      console.log('🔍 Looking for referral code:', referralCode);
+      
+      // Only find main referral codes (not used ones) and that are valid format
+      const referral = await Referral.findOne({ 
+        referralCode,
+        referralCode: { $regex: /^REF-/ },
+        referredUserId: { $exists: false }
+      }).lean();
+      
+      console.log('📋 Found referral:', referral);
+      
       return referral ? {
         id: referral._id.toString(),
         userId: referral.userId.toString(),
@@ -342,6 +373,8 @@ export class MongoDBStorage implements IMongoStorage {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
       
+      console.log('🎯 Creating referral record:', { referrerId, referredUserId, referralCode });
+      
       // Create a new referral record for the successful referral
       const referral = new Referral({
         userId: referrerId,
@@ -350,6 +383,8 @@ export class MongoDBStorage implements IMongoStorage {
         isCompleted: true
       });
       await referral.save();
+      
+      console.log('✅ Referral record created successfully');
     } catch (error) {
       console.error('Error creating referral record:', error);
       throw error;
