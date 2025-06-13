@@ -344,7 +344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (referralCode && isNewUser) {
         try {
           console.log('🔍 Processing referral code:', referralCode);
-          
+
           // Validate referral code format
           if (!referralCode.startsWith('REF-')) {
             console.log('❌ Invalid referral code format');
@@ -356,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Find the referrer by referral code
           const referralRecord = await storage.getReferralByCode(referralCode);
           console.log('📋 Referral record found:', referralRecord);
-          
+
           if (!referralRecord) {
             console.log('❌ Referral code not found in database');
             return res.status(400).json({ 
@@ -715,7 +715,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     try {
       console.log("🔍 Getting referral data for user:", req.session.userId);
-      
+
       const user = await storage.getUser(req.session.userId);
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -725,7 +725,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get or create referral code - this method now auto-creates if not exists
       let referralData = await storage.getUserReferralData(user.id);
-      
+
       console.log("📋 Referral data:", referralData);
 
       if (!referralData) {
@@ -793,7 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      
+
       res.json(user.hasClaimedDiscount || false);
     } catch (error) {
       console.error("Check discount access error:", error);
