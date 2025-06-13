@@ -7,6 +7,8 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import Home from "@/pages/home";
 import Services from "@/pages/services";
+import Referrals from "@/pages/referrals";
+import RewardServices from "@/pages/reward-services";
 import Wallet from "@/pages/wallet";
 import AddFunds from "@/pages/add-funds";
 import Orders from "@/pages/orders";
@@ -26,7 +28,8 @@ function Router() {
       <Route path="/wallet" component={Wallet} />
       <Route path="/add-funds" component={AddFunds} />
       <Route path="/orders" component={Orders} />
-      <Route path="/referrals" component={lazy(() => import("./pages/referrals"))} />
+      <Route path="/referrals" component={Referrals} />
+            <Route path="/reward-services" component={RewardServices} />
       <Route path="/faq" component={FAQ} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
