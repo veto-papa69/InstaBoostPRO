@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -371,7 +370,7 @@ export default function Referrals() {
                   </p>
                 </div>
               </div>
-              <Link href="/services-discount">
+              <Link href="/reward-services">
                 <Button className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-xl px-12 py-6 rounded-xl hover:scale-105 transition-all duration-300">
                   <i className="fas fa-shopping-bag mr-3"></i>
                   Shop with 50% Discount Now
