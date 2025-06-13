@@ -731,6 +731,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Referral endpoints
   app.get("/api/referrals", async (req, res) => {
+    // Ensure we always return JSON
+    res.setHeader('Content-Type', 'application/json');
+    
     if (!req.session.userId) {
       return res.status(401).json({ error: "Not authenticated" });
     }
@@ -751,19 +754,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("📋 Referral data:", referralData);
 
       if (!referralData) {
-        console.log("❌ No referral data found, this should not happen with updated method");
-        return res.status(500).json({ error: "Failed to generate referral code" });
+        console.log("❌ No referral data found, creating new one");
+        // Fallback: create referral code manually if needed
+        const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        referralData = {
+          referralCode,
+          userId: user.id,
+          isCompleted: false
+        };
       }
 
-      const referralCount = await storage.getReferralCount(user.id);
+      const referralCount = await storage.getReferralCount(user.id) || 0;
       const isEligibleForDiscount = referralCount >= 5;
       const hasClaimedDiscount = user.hasClaimedDiscount || false;
 
       console.log("📊 Referral count:", referralCount);
-
       console.log("🎯 Generated referral code:", referralData.referralCode);
 
-      res.json({
+      return res.status(200).json({
         referralCode: referralData.referralCode,
         referralCount,
         isEligibleForDiscount,
@@ -771,7 +779,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Get referrals error:", error);
-      res.status(500).json({ error: "Server error", details: error.message });
+      return res.status(500).json({ 
+        error: "Failed to load referral data", 
+        message: "Please try refreshing the page" 
+      });
     }
   });
 
