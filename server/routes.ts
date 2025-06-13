@@ -226,8 +226,6 @@ async function setupTelegramWebhook() {
   console.log('✅ Telegram webhook setup completed');
 }
 
-export { registerRoutes };
-
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(sessionConfig);
 
