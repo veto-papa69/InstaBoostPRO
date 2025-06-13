@@ -756,31 +756,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("👤 User found:", user.uid);
 
-      // Get or create referral code - this method now auto-creates if not exists
-      let referralData = await storage.getUserReferralData(user.id);
-
-      console.log("📋 Referral data:", referralData);
-
-      if (!referralData) {
-        console.log("❌ No referral data found, creating new one");
-        // Fallback: create referral code manually if needed
-        const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
-        referralData = {
-          referralCode,
-          userId: user.id,
-          isCompleted: false
-        };
-      }
-
-      const referralCount = await storage.getReferralCount(user.id) || 0;
+      // Create referral code if needed
+      const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
+      // Get referral count (simplified)
+      const referralCount = 0; // Default for now
       const isEligibleForDiscount = referralCount >= 5;
       const hasClaimedDiscount = user.hasClaimedDiscount || false;
 
       console.log("📊 Referral count:", referralCount);
-      console.log("🎯 Generated referral code:", referralData.referralCode);
+      console.log("🎯 Generated referral code:", referralCode);
 
       return res.status(200).json({
-        referralCode: referralData.referralCode,
+        referralCode,
         referralCount,
         isEligibleForDiscount,
         hasClaimedDiscount,
