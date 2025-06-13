@@ -181,10 +181,16 @@ const referralSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Add indexes for better performance
-referralSchema.index({ referralCode: 1 });
-referralSchema.index({ userId: 1 });
-referralSchema.index({ referredUserId: 1 });
+// Add indexes for better performance - only if not already defined
+if (!referralSchema.indexes().find(index => index.referralCode)) {
+  referralSchema.index({ referralCode: 1 });
+}
+if (!referralSchema.indexes().find(index => index.userId)) {
+  referralSchema.index({ userId: 1 });
+}
+if (!referralSchema.indexes().find(index => index.referredUserId)) {
+  referralSchema.index({ referredUserId: 1 });
+}
 
 const discountRewardSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
