@@ -19,9 +19,11 @@ export default function Referrals() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const { data: referralData, refetch } = useQuery<ReferralData>({
+  const { data: referralData, refetch, isLoading, error } = useQuery<ReferralData>({
     queryKey: ["/api/referrals"],
     enabled: isAuthenticated,
+    retry: 3,
+    retryDelay: 1000,
   });
 
   const claimRewardMutation = useMutation({
@@ -293,14 +295,40 @@ export default function Referrals() {
               <i className="fas fa-code mr-3"></i>
               Your Referral Code
             </h3>
+            
+            {/* Show error state if there's an error */}
+            {error && (
+              <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-6 mb-6">
+                <p className="text-red-300 text-center">
+                  <i className="fas fa-exclamation-triangle mr-2"></i>
+                  Failed to load referral code. Please refresh the page.
+                </p>
+              </div>
+            )}
+            
+            {/* Show loading state */}
+            {isLoading && (
+              <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-6 mb-6">
+                <p className="text-blue-300 text-center">
+                  <i className="fas fa-spinner fa-spin mr-2"></i>
+                  Loading your referral code...
+                </p>
+              </div>
+            )}
+            
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
                 <div className="text-cream/70 text-lg mb-3 font-medium">Share this referral code:</div>
                 <div className="text-cream font-mono text-2xl break-all bg-black/30 p-6 rounded-lg border text-center">
-                  {referralData?.referralCode ? (
+                  {isLoading ? (
+                    <span className="text-cream/50 animate-pulse">
+                      <i className="fas fa-spinner fa-spin mr-2"></i>
+                      Generating your code...
+                    </span>
+                  ) : referralData?.referralCode ? (
                     <span className="select-all text-gold font-bold">{referralData.referralCode}</span>
                   ) : (
-                    <span className="text-cream/50 animate-pulse">Generating your code...</span>
+                    <span className="text-cream/50">Code not available</span>
                   )}
                 </div>
                 <div className="text-cream/50 text-sm mt-3 text-center">
