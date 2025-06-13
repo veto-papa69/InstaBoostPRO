@@ -313,56 +313,30 @@ export default function Referrals() {
             {/* Show error state if there's an error */}
             {error && (
               <div className="text-center mb-8">
-          <div className="p-6 rounded-lg border-2 border-red-500/50 bg-red-500/10">
-            <p className="text-red-400 font-semibold">
-              {error?.message || "Failed to load referral code. Please refresh the page."}
-            </p>
-            <Button 
-              onClick={() => refetch()} 
-              className="mt-4 bg-gold text-charcoal hover:bg-gold/90"
-            >
-              <i className="fas fa-redo mr-2"></i>
-              Retry
-            </Button>
-          </div>
-        </div>
+                <div className="p-6 rounded-lg border-2 border-red-500/50 bg-red-500/10">
+                  <p className="text-red-400 font-semibold">
+                    {error?.message || "Failed to load referral code. Please refresh the page."}
+                  </p>
+                  <Button 
+                    onClick={() => refetch()} 
+                    className="mt-4 bg-gold text-charcoal hover:bg-gold/90"
+                  >
+                    <i className="fas fa-redo mr-2"></i>
+                    Retry
+                  </Button>
+                </div>
+              </div>
             )}
 
             {/* Show loading state */}
             {isLoading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
-          <p className="text-cream/70 mt-4">Generating your referral code...</p>
-        </div>
-      ) : error ? (
-              
-            
-              
-              
-            
-          
-              
-              
-                
-                
-              
-            
-          
-        
-      ) : (
-        
-          
-            
-              
-              
-                
-                  
-                
-              
-            
-          
-        
-      )}
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
+                <p className="text-cream/70 mt-4">Generating your referral code...</p>
+              </div>
+            ) : (
+              <div></div>
+            )}
 
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
