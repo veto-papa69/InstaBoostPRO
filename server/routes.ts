@@ -343,11 +343,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for referral code from request body
       if (referralCode && isNewUser) {
         try {
-          const referrerData = await storage.getUserByReferralCode(referralCode);
-          if (referrerData && referrerData.id !== user.id) {
-            // Create referral record
-            await storage.createReferralRecord(referrerData.id, user.id, referralCode);
-            console.log(`Referral recorded: ${referrerData.uid} referred ${user.uid}`);
+          // Find the referrer by referral code
+          const referralRecord = await storage.getReferralByCode(referralCode);
+          if (referralRecord && referralRecord.userId !== user.id) {
+            // Create referral record to track this successful referral
+            await storage.createReferralRecord(referralRecord.userId, user.id, referralCode);
+            console.log(`Referral recorded: User ${referralRecord.userId} referred ${user.uid} with code ${referralCode}`);
           }
         } catch (referralError) {
           console.error("Referral tracking error:", referralError);
@@ -695,7 +696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get or create referral code
       let referralData = await storage.getUserReferralData(user.id);
       if (!referralData) {
-        const referralCode = `REF${user.uid}${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+        const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
         referralData = await storage.createUserReferral(user.id, referralCode);
       }
 
