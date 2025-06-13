@@ -277,7 +277,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     console.log('⚠️ Telegram webhook setup failed (this is normal if no token provided)');
   }
 
-  // Referral code validation endpoint
+  // Referral code verification endpoint
+  app.post("/api/verify-referral-code", async (req, res) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      
+      const { code } = req.body;
+
+      if (!code || !code.startsWith('REF-')) {
+        return res.status(400).json({ 
+          valid: false, 
+          error: "Invalid referral code format. Code must start with REF-" 
+        });
+      }
+
+      const referralRecord = await storage.getReferralByCode(code);
+
+      if (!referralRecord) {
+        return res.status(400).json({ 
+          valid: false, 
+          error: "Referral code not found" 
+        });
+      }
+
+      // Get the owner's username
+      const owner = await storage.getUser(referralRecord.userId);
+      const ownerUsername = owner ? owner.instagramUsername : "Unknown";
+
+      res.json({ 
+        valid: true, 
+        ownerUsername,
+        message: "Referral code is valid" 
+      });
+    } catch (error) {
+      console.error("Referral verification error:", error);
+      res.status(500).json({ 
+        valid: false, 
+        error: "Failed to verify referral code" 
+      });
+    }
+  });
+
+  // Original referral validation endpoint (keeping for backwards compatibility)
   app.post("/api/validate-referral", async (req, res) => {
     try {
       const { referralCode } = req.body;
@@ -739,14 +780,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Referral endpoints
   app.get("/api/referrals", async (req: AuthenticatedRequest, res: Response) => {
-    // Ensure we always return JSON
-    res.setHeader('Content-Type', 'application/json');
-
-    if (!req.session.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-
     try {
+      // Ensure we always return JSON
+      res.setHeader('Content-Type', 'application/json');
+
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
       console.log("🔍 Getting referral data for user:", req.session.userId);
 
       const user = await storage.getUser(req.session.userId);
@@ -798,13 +839,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Get referrals error:", error);
       console.error("❌ Error stack:", error instanceof Error ? error.stack : "No stack");
       
-      // Return a safe fallback response
-      return res.status(200).json({
-        referralCode: `REF-TEMP-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+      // Always return JSON, never let errors fall through to default error handlers
+      return res.status(500).json({
+        error: "Internal server error",
+        referralCode: `REF-ERROR-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
         referralCount: 0,
         isEligibleForDiscount: false,
         hasClaimedDiscount: false,
       });
+    }
+  });
+
+  // Use referral code endpoint
+  app.post("/api/use-referral", async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { code } = req.body;
+
+      if (!code || !code.startsWith('REF-')) {
+        return res.status(400).json({ error: "Invalid referral code format" });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Find the referrer by referral code
+      const referralRecord = await storage.getReferralByCode(code);
+      if (!referralRecord) {
+        return res.status(400).json({ error: "Invalid referral code" });
+      }
+
+      // Prevent self-referral
+      if (referralRecord.userId === user.id) {
+        return res.status(400).json({ error: "Cannot refer yourself" });
+      }
+
+      // Create referral record to track this successful referral
+      await storage.createReferralRecord(referralRecord.userId, user.id, code);
+
+      // Get updated counts
+      const referralCount = await storage.getReferralCount(referralRecord.userId);
+      
+      res.json({ 
+        success: true, 
+        message: "Referral code applied successfully",
+        referralCount
+      });
+    } catch (error) {
+      console.error("Use referral error:", error);
+      res.status(500).json({ error: "Failed to use referral code" });
     }
   });
 
@@ -835,6 +925,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Claim reward error:", error);
       res.status(500).json({ error: "Server error" });
+    }
+  });
+
+  // Get my referrals endpoint  
+  app.get("/api/my-referrals", async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      res.setHeader('Content-Type', 'application/json');
+
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(req.session.userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Get or create referral code
+      let referralRecord = await storage.getReferralByUserId(user.id);
+      let referralCode = '';
+
+      if (!referralRecord) {
+        referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+        try {
+          referralRecord = await storage.createReferral({
+            userId: user.id,
+            referralCode: referralCode,
+            isCompleted: false
+          });
+        } catch (createError) {
+          console.error("Error creating referral:", createError);
+        }
+      } else {
+        referralCode = referralRecord.referralCode;
+      }
+
+      // Get referral count and eligibility
+      const referralCount = await storage.getReferralCount(user.id);
+      const isEligibleForDiscount = referralCount >= 5;
+      const hasClaimed = user.hasClaimedDiscount || false;
+
+      res.json({
+        referralCode,
+        referralCount,
+        isEligibleForDiscount,
+        hasClaimed
+      });
+    } catch (error) {
+      console.error("Get my referrals error:", error);
+      res.status(500).json({ 
+        error: "Failed to get referral data",
+        referralCode: `REF-ERROR-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+        referralCount: 0,
+        isEligibleForDiscount: false,
+        hasClaimed: false
+      });
     }
   });
 
