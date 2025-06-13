@@ -213,17 +213,17 @@ export default function Home() {
                     50% { background-position: 100% 50%; }
                     100% { background-position: 0% 50%; }
                   }
-                  
+
                   @keyframes pulseGlow {
                     0% { box-shadow: 0 15px 35px rgba(102, 126, 234, 0.6), 0 5px 15px rgba(0, 0, 0, 0.12); }
                     100% { box-shadow: 0 20px 40px rgba(102, 126, 234, 0.8), 0 8px 20px rgba(0, 0, 0, 0.15); }
                   }
-                  
+
                   @keyframes spin-slow {
                     from { transform: rotate(0deg); }
                     to { transform: rotate(360deg); }
                   }
-                  
+
                   .animate-spin-slow {
                     animation: spin-slow 3s linear infinite;
                   }
@@ -285,6 +285,45 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+        {/* CTA Section */}
+        <section className="text-center py-20">
+          <h2 className="text-4xl font-bold mb-6" style={{ color: 'var(--primary-text)' }}>
+            Ready to Boost Your Instagram?
+          </h2>
+          <p className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: 'var(--secondary-text)' }}>
+            Join thousands of satisfied customers who have grown their Instagram presence with our premium services.
+          </p>
+
+          {/* Special Discount CTA */}
+          <div className="mb-8">
+            <Button 
+              size="lg" 
+              className="text-lg px-8 py-4 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white font-bold animate-pulse hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+              onClick={() => {
+                setLocation("/login?ref=campaign");
+              }}
+            >
+              <i className="fas fa-gift mr-2"></i>
+              Get 50% Flat Discount
+              <i className="fas fa-arrow-right ml-2"></i>
+            </Button>
+            <div className="text-sm mt-2 text-green-400 font-semibold animate-bounce">
+              🎁 Limited Time Offer - Refer 5 Friends & Save Big!
+            </div>
+          </div>
+
+          <div className="text-sm mb-6" style={{ color: 'var(--secondary-text)' }}>
+            Or start with regular pricing:
+          </div>
+
+          <Button 
+            size="lg" 
+            className="text-lg px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            onClick={() => setIsAuthModalOpen(true)}
+          >
+            Get Started Today
+          </Button>
         </section>
       </div>
 
