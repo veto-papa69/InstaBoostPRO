@@ -402,17 +402,6 @@ export class MongoDBStorage implements IMongoStorage {
       throw error;
     }
   }
-
-  async getUserReferralData(userId: string): Promise<any> {
-    // For now, return null to trigger fallback code creation
-    return null;
-  }
-
-  async getReferralCount(userId: string): Promise<number> {
-    // Count referrals where this user is the referrer
-    const count = await Referral.countDocuments({ userId });
-    return count;
-  }
 }
 
 // Create and export the storage instance
