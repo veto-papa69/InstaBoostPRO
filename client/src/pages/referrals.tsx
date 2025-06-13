@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
@@ -149,7 +147,7 @@ export default function Referrals() {
                 {(referralData?.referralCount || 0) * 20}% Progress to Reward
               </div>
             </div>
-            
+
             <div className="bg-charcoal border-2 border-green-400/30 rounded-2xl p-8 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
               <div className="text-6xl font-bold text-green-400 mb-4 flex items-center justify-center">
                 <i className="fas fa-target mr-3 text-4xl"></i>
@@ -160,7 +158,7 @@ export default function Referrals() {
                 {(referralData?.referralCount || 0) >= 5 ? "🎯 Goal Achieved!" : "Keep Going!"}
               </div>
             </div>
-            
+
             <div className="bg-charcoal border-2 border-purple-400/30 rounded-2xl p-8 text-center transform hover:scale-105 transition-all duration-300 shadow-xl">
               <div className="text-6xl font-bold text-purple-400 mb-4 flex items-center justify-center">
                 <i className="fas fa-percentage mr-3 text-4xl"></i>
@@ -184,7 +182,7 @@ export default function Referrals() {
                 {referralData?.referralCount || 0}/5
               </span>
             </div>
-            
+
             {/* Enhanced Progress Bar */}
             <div className="relative mb-12">
               <div className="w-full bg-charcoal-dark rounded-full h-8 shadow-inner border border-gray-600">
@@ -195,7 +193,7 @@ export default function Referrals() {
                   <div className="absolute inset-0 bg-gradient-to-r from-white/30 to-transparent animate-pulse"></div>
                 </div>
               </div>
-              
+
               {/* Milestone Markers */}
               <div className="absolute -top-2 left-0 w-full h-12 flex justify-between items-center">
                 {[1, 2, 3, 4, 5].map((milestone) => (
@@ -213,7 +211,7 @@ export default function Referrals() {
                     ) : (
                       <span className="text-sm font-bold">{milestone}</span>
                     )}
-                    
+
                     {/* Milestone Labels */}
                     <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-center whitespace-nowrap">
                       <div className={`text-sm font-semibold ${(referralData?.referralCount || 0) >= milestone ? 'text-green-400' : 'text-gray-500'}`}>
@@ -228,7 +226,7 @@ export default function Referrals() {
                 ))}
               </div>
             </div>
-            
+
             {/* Motivational Messages */}
             <div className="text-center mt-16">
               {(referralData?.referralCount || 0) === 0 && (
@@ -273,8 +271,12 @@ export default function Referrals() {
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
                 <div className="text-cream/70 text-lg mb-3 font-medium">Share this magic link:</div>
-                <div className="text-cream font-mono text-lg break-all bg-black/30 p-4 rounded-lg border">
-                  {referralData?.referralLink || "Loading your personalized link..."}
+                <div className="text-cream font-mono text-base break-all bg-black/30 p-4 rounded-lg border max-h-20 overflow-y-auto">
+                  {referralData?.referralLink ? (
+                    <span className="select-all">{referralData.referralLink}</span>
+                  ) : (
+                    <span className="text-cream/50 animate-pulse">Loading your personalized link...</span>
+                  )}
                 </div>
               </div>
               <Button 
@@ -330,14 +332,14 @@ export default function Referrals() {
                   <div className="absolute bottom-16 left-20 text-5xl animate-bounce delay-300">🎁</div>
                   <div className="absolute bottom-10 right-10 text-6xl animate-pulse delay-500">🏆</div>
                 </div>
-                
+
                 <h3 className="text-5xl font-bold text-yellow-400 mb-6 animate-pulse relative z-10">
                   🏆 MISSION ACCOMPLISHED! 🏆
                 </h3>
                 <p className="text-2xl text-cream mb-10 relative z-10 max-w-2xl mx-auto">
                   Incredible! You've successfully referred 5 friends. Time to claim your exclusive lifetime reward!
                 </p>
-                
+
                 <Button 
                   onClick={handleClaimReward}
                   disabled={claimRewardMutation.isPending}
@@ -379,7 +381,7 @@ export default function Referrals() {
                     ✨ Your exclusive discount is automatically applied at checkout
                   </p>
                 </div>
-                
+
                 <Link href="/reward-services">
                   <Button className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-2xl px-16 py-8 rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl">
                     <i className="fas fa-shopping-bag mr-4 text-xl"></i>
