@@ -22,22 +22,42 @@ export default function Referrals() {
   const { data: referralData, isLoading, error, refetch } = useQuery({
     queryKey: ["referrals"],
     queryFn: async () => {
-      const token = localStorage.getItem("token");
-      const response = await fetch("/api/referrals", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      try {
+        const response = await fetch("/api/referrals", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Use cookies for session instead of token
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || "Failed to fetch referral data");
+        console.log("Response status:", response.status);
+        console.log("Response headers:", response.headers.get("content-type"));
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Error response:", errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const responseText = await response.text();
+          console.error("Non-JSON response:", responseText);
+          throw new Error("Server returned non-JSON response");
+        }
+
+        const data = await response.json();
+        console.log("Referral data received:", data);
+        return data;
+      } catch (error) {
+        console.error("Fetch error:", error);
+        throw error;
       }
-
-      return response.json();
     },
     enabled: isAuthenticated,
-    retry: 3,
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   const claimRewardMutation = useMutation({
