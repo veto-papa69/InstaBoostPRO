@@ -1,4 +1,3 @@
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -41,6 +40,17 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
   const { toast } = useToast();
   const login = useLogin();
 
+  const [instagramUsername, setInstagramUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [referralCodeValid, setReferralCodeValid] = useState<boolean | null>(null);
+  const [referralOwner, setReferralOwner] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+
+  // Check if user came from campaign
+  const urlParams = new URLSearchParams(window.location.search);
+  const isFromCampaign = urlParams.get('ref') === 'campaign';
+
   const [referralCode, setReferralCode] = useState(sessionStorage.getItem('referralCode') || "");
 
   const form = useForm<LoginForm>({
@@ -51,6 +61,36 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
       referralCode: "",
     },
   });
+
+  // Validate referral code
+  const validateReferralCode = async (code: string) => {
+    if (!code || !code.startsWith('REF-')) {
+      setReferralCodeValid(false);
+      setReferralOwner("");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/verify-referral-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        setReferralCodeValid(true);
+        setReferralOwner(data.ownerUsername || "Unknown");
+      } else {
+        setReferralCodeValid(false);
+        setReferralOwner("");
+      }
+    } catch (error) {
+      setReferralCodeValid(false);
+      setReferralOwner("");
+    }
+  };
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -64,7 +104,7 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
           });
           return;
         }
-        
+
         // Check if referral code exists
         const validateResponse = await fetch("/api/validate-referral", {
           method: "POST",
@@ -73,7 +113,7 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
           },
           body: JSON.stringify({ referralCode: referralCode.trim() }),
         });
-        
+
         if (!validateResponse.ok) {
           const errorData = await validateResponse.json();
           toast({
@@ -132,7 +172,22 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
 
         <div className="space-y-6">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Campaign Banner */}
+        {isFromCampaign && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg border border-green-400/30">
+            <div className="text-center">
+              <i className="fas fa-gift text-2xl text-green-400 mb-2"></i>
+              <p className="text-green-400 font-semibold">
+                🎉 Special Offer Available!
+              </p>
+              <p className="text-sm mt-1" style={{ color: 'var(--secondary-text)' }}>
+                Login with your Instagram account for personalized services, offers, and discounts.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="instagramUsername"
