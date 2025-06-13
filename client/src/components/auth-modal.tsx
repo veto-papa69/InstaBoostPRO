@@ -54,6 +54,37 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
 
   const onSubmit = async (data: LoginForm) => {
     try {
+      // Validate referral code if provided
+      if (referralCode && referralCode.trim()) {
+        if (!referralCode.startsWith('REF-')) {
+          toast({
+            title: "Invalid Referral Code",
+            description: "Referral code must start with REF-",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Check if referral code exists
+        const validateResponse = await fetch("/api/validate-referral", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ referralCode: referralCode.trim() }),
+        });
+        
+        if (!validateResponse.ok) {
+          const errorData = await validateResponse.json();
+          toast({
+            title: "Invalid Referral Code",
+            description: errorData.error || "Referral code not found",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
       const loginData = {
         ...data,
         referralCode: referralCode.trim() || undefined
@@ -61,7 +92,7 @@ export function AuthModal({ isOpen, onClose, isFromBonus = false }: AuthModalPro
       await login.mutateAsync(loginData);
       toast({
         title: "Login Successful!",
-        description: "Welcome to InstaBoost Pro!",
+        description: referralCode ? "Welcome! Your referral has been processed." : "Welcome to InstaBoost Pro!",
       });
       onClose();
       // Force page reload to update authentication state
