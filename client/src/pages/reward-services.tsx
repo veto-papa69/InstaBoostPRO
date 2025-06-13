@@ -1,248 +1,262 @@
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../hooks/use-auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/use-auth";
-import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { ServiceModal } from "@/components/service-modal";
-import { AuthModal } from "@/components/auth-modal";
+import { useToast } from "../hooks/use-toast";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Badge } from "../components/ui/badge";
+import { useNavigate } from "react-router-dom";
+import ServiceModal from "../components/service-modal";
 
 interface Service {
-  id: number;
+  id: string;
   name: string;
   category: string;
-  rate: string;
-  minOrder: number;
-  maxOrder: number;
-  deliveryTime: string;
-  active: boolean;
+  price: number;
+  originalPrice: number;
+  description: string;
+  minQuantity: number;
+  maxQuantity: number;
 }
 
 export default function RewardServices() {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [hasDiscountAccess, setHasDiscountAccess] = useState(false);
 
-  // Check if user has discount access
-  useQuery({
-    queryKey: ["/api/referrals/discount-access"],
-    enabled: isAuthenticated,
-    onSuccess: (data) => {
-      setHasDiscountAccess(data);
-      if (!data) {
-        toast({
-          title: "Access Denied",
-          description: "You need to complete 5 referrals to access discount services!",
-          variant: "destructive",
-        });
-      }
+  // Check eligibility on mount
+  const { data: referralData, isLoading: referralLoading } = useQuery({
+    queryKey: ["my-referrals"],
+    queryFn: async () => {
+      const response = await fetch("/api/my-referrals", {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch referral data");
+      return response.json();
     },
+    enabled: isAuthenticated,
   });
 
-  const { data: services, isLoading } = useQuery<Service[]>({
-    queryKey: ["/api/services"],
-    enabled: isAuthenticated && hasDiscountAccess,
+  // Redirect if not eligible
+  useEffect(() => {
+    if (referralData && (!referralData.isEligibleForDiscount || referralData.hasClaimed)) {
+      toast({
+        title: "Access Denied",
+        description: referralData.hasClaimed 
+          ? "You have already claimed your reward"
+          : "You need 5 referrals to access reward services",
+        variant: "destructive",
+      });
+      navigate("/referrals");
+    }
+  }, [referralData, navigate, toast]);
+
+  // Fetch services with discount applied
+  const { data: services, isLoading: servicesLoading } = useQuery({
+    queryKey: ["reward-services"],
+    queryFn: async () => {
+      const response = await fetch("/api/services");
+      if (!response.ok) throw new Error("Failed to fetch services");
+      const originalServices = await response.json();
+      
+      // Apply 50% discount
+      return originalServices.map((service: any) => ({
+        ...service,
+        originalPrice: service.price,
+        price: Math.round(service.price * 0.5), // 50% off
+      }));
+    },
+    enabled: isAuthenticated && referralData?.isEligibleForDiscount && !referralData?.hasClaimed,
   });
 
-  const orderMutation = useMutation({
-    mutationFn: async (orderData: any) => {
+  const createOrderMutation = useMutation({
+    mutationFn: async ({ serviceName, instagramUsername, quantity, price }: any) => {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
+        credentials: "include",
+        body: JSON.stringify({ serviceName, instagramUsername, quantity, price }),
       });
-      if (!response.ok) throw new Error("Failed to place order");
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to create order");
+      }
+
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Order Placed!",
-        description: "Your discounted order has been placed successfully!",
+        title: "Order Placed Successfully!",
+        description: "Your discounted order has been placed and is being processed.",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["user"] });
       setSelectedService(null);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast({
         title: "Order Failed",
-        description: error.message || "Failed to place order",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const handleServiceClick = (service: Service) => {
-    if (!isAuthenticated) {
-      setIsAuthModalOpen(true);
-      return;
-    }
-    if (!hasDiscountAccess) {
-      toast({
-        title: "Access Required",
-        description: "Complete 5 referrals to unlock 50% discount!",
-        variant: "destructive",
-      });
-      return;
-    }
-    setSelectedService(service);
+  const handleOrderSubmit = (orderData: any) => {
+    createOrderMutation.mutate(orderData);
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen pt-28 pb-8" style={{ backgroundColor: 'var(--main-bg)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-20">
-            <i className="fas fa-lock text-gold text-6xl mb-6"></i>
-            <h1 className="text-4xl font-bold text-gold mb-4">Login Required</h1>
-            <p className="text-xl text-cream/70 mb-8">Please login to access exclusive discount services</p>
-            <Button onClick={() => setIsAuthModalOpen(true)} className="btn-primary px-8 py-3 text-lg">
-              Login Now
-            </Button>
-          </div>
-        </div>
-        <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
-      </div>
-    );
+    navigate("/");
+    return null;
   }
 
-  if (!hasDiscountAccess) {
+  if (referralLoading || servicesLoading) {
     return (
-      <div className="min-h-screen pt-28 pb-8" style={{ backgroundColor: 'var(--main-bg)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-20">
-            <i className="fas fa-gift text-gold text-6xl mb-6"></i>
-            <h1 className="text-4xl font-bold text-gold mb-4">Discount Access Required</h1>
-            <p className="text-xl text-cream/70 mb-8">You need to complete 5 referrals to unlock 50% discount on all services!</p>
-            <Button onClick={() => window.location.href = "/referrals"} className="btn-primary px-8 py-3 text-lg">
-              Complete Referrals
-            </Button>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--main-bg)' }}>
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="text-xl" style={{ color: 'var(--primary-text)' }}>Loading reward services...</div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen pt-28 pb-8" style={{ backgroundColor: 'var(--main-bg)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center py-20">
-            <i className="fas fa-spinner fa-spin text-gold text-6xl mb-6"></i>
-            <h1 className="text-2xl font-bold text-gold">Loading Discount Services...</h1>
-          </div>
-        </div>
-      </div>
-    );
+  if (!referralData?.isEligibleForDiscount || referralData?.hasClaimed) {
+    return null; // Will redirect via useEffect
   }
 
-  const serviceCategories = services?.reduce((acc, service) => {
-    if (!acc[service.category]) acc[service.category] = [];
+  const groupedServices = services?.reduce((acc: any, service: Service) => {
+    if (!acc[service.category]) {
+      acc[service.category] = [];
+    }
     acc[service.category].push(service);
     return acc;
-  }, {} as Record<string, Service[]>) || {};
+  }, {}) || {};
 
   return (
-    <>
-      <div className="pt-28 pb-16" style={{ backgroundColor: 'var(--main-bg)' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-full px-6 py-2 mb-6">
-              <i className="fas fa-crown text-yellow-400 mr-2"></i>
-              <span className="text-green-400 font-semibold">Exclusive 50% Discount Services</span>
-            </div>
-            <h1 className="text-5xl font-bold text-gold mb-6">
-              Premium Services at 
-              <span className="text-green-400"> Half Price!</span>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--main-bg)' }}>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <i className="fas fa-gift text-4xl text-yellow-400"></i>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+              🎉 Reward Services - 50% OFF! 🎉
             </h1>
-            <p className="text-xl text-cream/80 max-w-3xl mx-auto mb-8">
-              Congratulations! You've unlocked exclusive 50% discount on all our premium services. 
-              Enjoy the same quality at unbeatable prices.
+          </div>
+          <p className="text-lg" style={{ color: 'var(--secondary-text)' }}>
+            Congratulations! You've earned access to our premium services at 50% discount.
+          </p>
+          <div className="mt-4 p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg border border-green-400/30">
+            <p className="text-green-400 font-semibold">
+              ✅ Referral Goal Achieved: {referralData?.referralCount}/5 referrals completed
             </p>
-            <div className="bg-gradient-to-r from-yellow-400/10 to-orange-500/10 border border-yellow-400/20 rounded-xl p-4 max-w-md mx-auto">
-              <p className="text-yellow-400 font-medium">
-                🎉 You're saving up to ₹500 on every order!
-              </p>
+          </div>
+        </div>
+
+        {/* Current Balance */}
+        <div className="text-center mb-8">
+          <div className="inline-block p-4 rounded-lg border-2" style={{ borderColor: 'var(--gold)', backgroundColor: 'var(--charcoal)' }}>
+            <div className="text-sm" style={{ color: 'var(--secondary-text)' }}>Current Balance</div>
+            <div className="text-2xl font-bold" style={{ color: 'var(--gold)' }}>
+              ₹{user?.walletBalance || 0}
             </div>
           </div>
+        </div>
 
-          {/* Services Grid */}
-          {Object.entries(serviceCategories).map(([category, categoryServices]) => (
-            <div key={category} className="mb-12">
-              <h2 className="text-3xl font-bold text-gold mb-8 text-center">{category}</h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categoryServices.map((service) => {
-                  const originalPrice = parseFloat(service.rate);
-                  const discountedPrice = (originalPrice / 2).toFixed(2);
+        {/* Services Grid */}
+        {Object.entries(groupedServices).map(([category, categoryServices]) => (
+          <div key={category} className="mb-12">
+            <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: 'var(--primary-text)' }}>
+              {category}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(categoryServices as Service[]).map((service) => (
+                <Card 
+                  key={service.id}
+                  className="relative overflow-hidden transition-all duration-300 hover:scale-105 cursor-pointer border-2"
+                  style={{ 
+                    backgroundColor: 'var(--charcoal)', 
+                    borderColor: 'var(--gold)',
+                  }}
+                  onClick={() => setSelectedService(service)}
+                >
+                  {/* 50% OFF Badge */}
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 text-sm font-bold transform rotate-12 translate-x-3 -translate-y-1">
+                    50% OFF
+                  </div>
                   
-                  return (
-                    <div
-                      key={service.id}
-                      className="bg-charcoal border border-gold/20 rounded-xl p-6 hover:border-gold/40 transition-all duration-300 hover:transform hover:scale-105 cursor-pointer relative overflow-hidden"
-                      onClick={() => handleServiceClick(service)}
-                    >
-                      {/* 50% OFF Badge */}
-                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-bold transform rotate-12 shadow-lg">
-                        50% OFF!
-                      </div>
-                      
-                      <div className="mb-4">
-                        <h3 className="text-xl font-bold text-gold mb-2">{service.name}</h3>
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-cream/50 line-through text-lg">₹{service.rate}</span>
-                          <span className="text-green-400 font-bold text-2xl">₹{discountedPrice}</span>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg" style={{ color: 'var(--primary-text)' }}>
+                      {service.name}
+                    </CardTitle>
+                    <CardDescription style={{ color: 'var(--secondary-text)' }}>
+                      {service.description}
+                    </CardDescription>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Pricing */}
+                      <div className="text-center">
+                        <div className="text-sm line-through" style={{ color: 'var(--secondary-text)' }}>
+                          ₹{service.originalPrice}
                         </div>
-                        <p className="text-cream/70 text-sm">Per 1000 {service.name.toLowerCase().includes('follower') ? 'followers' : service.name.toLowerCase().includes('like') ? 'likes' : service.name.toLowerCase().includes('view') ? 'views' : 'items'}</p>
-                      </div>
-
-                      <div className="space-y-2 text-sm text-cream/70">
-                        <div className="flex justify-between">
-                          <span>Min Order:</span>
-                          <span className="text-cream">{service.minOrder.toLocaleString()}</span>
+                        <div className="text-2xl font-bold" style={{ color: 'var(--gold)' }}>
+                          ₹{service.price}
                         </div>
-                        <div className="flex justify-between">
-                          <span>Max Order:</span>
-                          <span className="text-cream">{service.maxOrder.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Delivery:</span>
-                          <span className="text-cream">{service.deliveryTime}</span>
+                        <div className="text-sm text-green-400">
+                          You save ₹{service.originalPrice - service.price}
                         </div>
                       </div>
 
-                      <Button className="w-full mt-4 btn-primary">
-                        <i className="fas fa-shopping-cart mr-2"></i>
-                        Order Now (50% OFF)
+                      {/* Quantity Range */}
+                      <div className="text-center text-sm" style={{ color: 'var(--secondary-text)' }}>
+                        Quantity: {service.minQuantity.toLocaleString()} - {service.maxQuantity.toLocaleString()}
+                      </div>
+
+                      {/* Order Button */}
+                      <Button 
+                        className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-semibold"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedService(service);
+                        }}
+                      >
+                        Order Now - 50% OFF
                       </Button>
                     </div>
-                  );
-                })}
-              </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          ))}
+          </div>
+        ))}
+
+        {/* Service Modal */}
+        {selectedService && (
+          <ServiceModal
+            service={selectedService}
+            onClose={() => setSelectedService(null)}
+            onSubmit={handleOrderSubmit}
+            isLoading={createOrderMutation.isPending}
+            showDiscountBadge={true}
+          />
+        )}
+
+        {/* Footer Note */}
+        <div className="text-center mt-12 p-6 rounded-lg" style={{ backgroundColor: 'var(--charcoal)' }}>
+          <p style={{ color: 'var(--secondary-text)' }}>
+            🎁 This is a one-time reward for achieving 5 referrals. Share your referral code with friends to help them get started!
+          </p>
         </div>
       </div>
-
-      {selectedService && (
-        <ServiceModal
-          service={{
-            ...selectedService,
-            rate: (parseFloat(selectedService.rate) / 2).toFixed(2) // Apply 50% discount
-          }}
-          isOpen={!!selectedService}
-          onClose={() => setSelectedService(null)}
-          onOrder={(orderData) => orderMutation.mutate(orderData)}
-          isLoading={orderMutation.isPending}
-        />
-      )}
-
-      <AuthModal 
-        isOpen={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)} 
-      />
-    </>
+    </div>
   );
 }
