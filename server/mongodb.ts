@@ -188,14 +188,14 @@ const discountRewardSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-// Create Models
-export const User = mongoose.model('User', userSchema);
-export const Order = mongoose.model('Order', orderSchema);
-export const Payment = mongoose.model('Payment', paymentSchema);
-export const Service = mongoose.model('Service', serviceSchema);
-export const LoginLog = mongoose.model('LoginLog', loginLogSchema);
-export const Referral = mongoose.model('Referral', referralSchema);
-export const DiscountReward = mongoose.model('DiscountReward', discountRewardSchema);
+// Create Models - Prevent overwrite errors
+export const User = mongoose.models.User || mongoose.model('User', userSchema);
+export const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
+export const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
+export const Service = mongoose.models.Service || mongoose.model('Service', serviceSchema);
+export const LoginLog = mongoose.models.LoginLog || mongoose.model('LoginLog', loginLogSchema);
+export const Referral = mongoose.models.Referral || mongoose.model('Referral', referralSchema);
+export const DiscountReward = mongoose.models.DiscountReward || mongoose.model('DiscountReward', discountRewardSchema);
 
 // MongoDB Connection Function
 export async function connectMongoDB() {
