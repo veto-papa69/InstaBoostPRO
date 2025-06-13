@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../co
 import { Badge } from "../components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import ServiceModal from "../components/service-modal";
+import { Link } from "wouter";
 
 interface Service {
   id: string;
@@ -61,7 +61,7 @@ export default function RewardServices() {
       const response = await fetch("/api/services");
       if (!response.ok) throw new Error("Failed to fetch services");
       const originalServices = await response.json();
-      
+
       // Apply 50% discount
       return originalServices.map((service: any) => ({
         ...service,
@@ -191,7 +191,7 @@ export default function RewardServices() {
                   <div className="absolute top-0 right-0 bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1 text-sm font-bold transform rotate-12 translate-x-3 -translate-y-1">
                     50% OFF
                   </div>
-                  
+
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg" style={{ color: 'var(--primary-text)' }}>
                       {service.name}
@@ -200,7 +200,7 @@ export default function RewardServices() {
                       {service.description}
                     </CardDescription>
                   </CardHeader>
-                  
+
                   <CardContent>
                     <div className="space-y-4">
                       {/* Pricing */}
