@@ -237,6 +237,100 @@ export class MongoDBStorage implements IMongoStorage {
       return 0;
     }
   }
+
+  // Referral methods
+  async getUserReferralData(userId: string): Promise<any> {
+    try {
+      const { Referral } = await import('./mongodb');
+      const referral = await Referral.findOne({ userId });
+      return referral ? {
+        id: referral._id.toString(),
+        userId: referral.userId,
+        referralCode: referral.referralCode,
+        referredUserId: referral.referredUserId,
+        isCompleted: referral.isCompleted
+      } : null;
+    } catch (error) {
+      console.error('Error getting user referral data:', error);
+      return null;
+    }
+  }
+
+  async createUserReferral(userId: string, referralCode: string): Promise<any> {
+    try {
+      const { Referral } = await import('./mongodb');
+      const referral = new Referral({
+        userId,
+        referralCode
+      });
+      await referral.save();
+      return {
+        id: referral._id.toString(),
+        userId: referral.userId,
+        referralCode: referral.referralCode,
+        referredUserId: referral.referredUserId,
+        isCompleted: referral.isCompleted
+      };
+    } catch (error) {
+      console.error('Error creating user referral:', error);
+      throw error;
+    }
+  }
+
+  async getReferralCount(userId: string): Promise<number> {
+    try {
+      const { Referral } = await import('./mongodb');
+      return await Referral.countDocuments({ 
+        userId, 
+        isCompleted: true
+      });
+    } catch (error) {
+      console.error('Error getting referral count:', error);
+      return 0;
+    }
+  }
+
+  async getReferralByCode(referralCode: string): Promise<any> {
+    try {
+      const { Referral } = await import('./mongodb');
+      const referral = await Referral.findOne({ referralCode });
+      return referral ? {
+        id: referral._id.toString(),
+        userId: referral.userId,
+        referralCode: referral.referralCode,
+        referredUserId: referral.referredUserId,
+        isCompleted: referral.isCompleted
+      } : null;
+    } catch (error) {
+      console.error('Error getting referral by code:', error);
+      return null;
+    }
+  }
+
+  async createReferralRecord(referrerId: string, referredUserId: string, referralCode: string): Promise<void> {
+    try {
+      const { Referral } = await import('./mongodb');
+      const referral = new Referral({
+        userId: referrerId,
+        referralCode,
+        referredUserId,
+        isCompleted: true
+      });
+      await referral.save();
+    } catch (error) {
+      console.error('Error creating referral record:', error);
+      throw error;
+    }
+  }
+
+  async updateUserDiscountStatus(userId: string, hasClaimedDiscount: boolean): Promise<void> {
+    try {
+      await User.findByIdAndUpdate(userId, { hasClaimedDiscount });
+    } catch (error) {
+      console.error('Error updating user discount status:', error);
+      throw error;
+    }
+  }
 }
 
 // Create and export the storage instance
