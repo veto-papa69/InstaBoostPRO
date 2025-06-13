@@ -19,11 +19,25 @@ export default function Referrals() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
-  const { data: referralData, refetch, isLoading, error } = useQuery<ReferralData>({
-    queryKey: ["/api/referrals"],
+  const { data: referralData, isLoading, error, refetch } = useQuery({
+    queryKey: ["referrals"],
+    queryFn: async () => {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/referrals", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to fetch referral data");
+      }
+
+      return response.json();
+    },
     enabled: isAuthenticated,
     retry: 3,
-    retryDelay: 1000,
   });
 
   const claimRewardMutation = useMutation({
@@ -79,7 +93,7 @@ export default function Referrals() {
     );
   }
 
-  
+
 
   const handleClaimReward = () => {
     claimRewardMutation.mutate();
@@ -295,27 +309,61 @@ export default function Referrals() {
               <i className="fas fa-code mr-3"></i>
               Your Referral Code
             </h3>
-            
+
             {/* Show error state if there's an error */}
             {error && (
-              <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-6 mb-6">
-                <p className="text-red-300 text-center">
-                  <i className="fas fa-exclamation-triangle mr-2"></i>
-                  Failed to load referral code. Please refresh the page.
-                </p>
-              </div>
+              <div className="text-center mb-8">
+          <div className="p-6 rounded-lg border-2 border-red-500/50 bg-red-500/10">
+            <p className="text-red-400 font-semibold">
+              {error?.message || "Failed to load referral code. Please refresh the page."}
+            </p>
+            <Button 
+              onClick={() => refetch()} 
+              className="mt-4 bg-gold text-charcoal hover:bg-gold/90"
+            >
+              <i className="fas fa-redo mr-2"></i>
+              Retry
+            </Button>
+          </div>
+        </div>
             )}
-            
+
             {/* Show loading state */}
-            {isLoading && (
-              <div className="bg-blue-500/10 border border-blue-400/30 rounded-xl p-6 mb-6">
-                <p className="text-blue-300 text-center">
-                  <i className="fas fa-spinner fa-spin mr-2"></i>
-                  Loading your referral code...
-                </p>
-              </div>
-            )}
+            {isLoading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
+          <p className="text-cream/70 mt-4">Generating your referral code...</p>
+        </div>
+      ) : error ? (
+              
             
+              
+              
+            
+          
+              
+              
+                
+                
+              
+            
+          
+        
+      ) : (
+        
+          
+            
+              
+              
+                
+                  
+                
+              
+            
+          
+        
+      )}
+
             <div className="flex flex-col lg:flex-row gap-6">
               <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
                 <div className="text-cream/70 text-lg mb-3 font-medium">Share this referral code:</div>
