@@ -15,7 +15,7 @@ import {
 export interface IMongoStorage {
   // Database initialization
   initializeDatabase(): Promise<void>;
-  
+
   // User operations
   getUser(id: string): Promise<IUser | null>;
   getUserByUsername(username: string): Promise<IUser | null>;
@@ -23,21 +23,21 @@ export interface IMongoStorage {
   createUser(userData: Omit<IUser, '_id' | 'createdAt'>): Promise<IUser>;
   updateUserBalance(userId: string, newBalance: number): Promise<void>;
   markBonusClaimed(userId: string): Promise<void>;
-  
+
   // Order operations
   createOrder(orderData: Omit<IOrder, '_id' | 'createdAt'>): Promise<IOrder>;
   getUserOrders(userId: string): Promise<IOrder[]>;
-  
+
   // Payment operations
   createPayment(paymentData: Omit<IPayment, '_id' | 'createdAt'>): Promise<IPayment>;
   getUserPayments(userId: string): Promise<IPayment[]>;
   getPayment(id: string): Promise<IPayment | null>;
   updatePaymentStatus(id: string, status: string): Promise<void>;
-  
+
   // Service operations
   getServices(): Promise<IService[]>;
   initializeServices(): Promise<void>;
-  
+
   // Login tracking operations
   logUserLogin(userId: string, instagramUsername: string): Promise<number>;
   getUserLoginCount(userId: string): Promise<number>;
@@ -213,13 +213,13 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       const currentCount = await this.getUserLoginCount(userId);
       const newCount = currentCount + 1;
-      
+
       const loginLog = new LoginLog({
         userId,
         instagramUsername,
         loginCount: newCount
       });
-      
+
       await loginLog.save();
       return newCount;
     } catch (error) {
@@ -243,25 +243,24 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      
+
       console.log('🔍 Getting referral data for userId:', userId);
-      
+
       // First check if user has any referral code (as referrer) - only check for main referral code, not used ones
       let referral = await Referral.findOne({ 
         userId, 
-        referralCode: { $regex: /^REF-/ },
         referredUserId: { $exists: false }
       }).lean();
-      
+
       console.log('📋 Found existing referral:', referral);
-      
+
       if (!referral) {
         // If no referral found, create one automatically
         const user = await this.getUser(userId);
         if (user) {
           const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
           console.log('🎯 Creating new referral code:', referralCode);
-          
+
           const newReferral = new Referral({
             userId,
             referralCode,
@@ -272,7 +271,7 @@ export class MongoDBStorage implements IMongoStorage {
           console.log('✅ New referral created successfully');
         }
       }
-      
+
       const result = referral ? {
         id: referral._id.toString(),
         userId: referral.userId,
@@ -280,7 +279,7 @@ export class MongoDBStorage implements IMongoStorage {
         referredUserId: referral.referredUserId,
         isCompleted: referral.isCompleted
       } : null;
-      
+
       console.log('📤 Returning referral data:', result);
       return result;
     } catch (error) {
@@ -293,13 +292,13 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      
+
       // Check if referral code already exists
       const existingReferral = await Referral.findOne({ referralCode });
       if (existingReferral) {
         throw new Error('Referral code already exists');
       }
-      
+
       const referral = new Referral({
         userId,
         referralCode,
@@ -323,18 +322,19 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      
-      // Count only the referrals where this user referred someone else
+
+      console.log('🔍 Getting referral count for userId:', userId);
+
+      // Count referrals where this user referred others (has referredUserId)
       const count = await Referral.countDocuments({ 
-        userId, 
-        isCompleted: true,
-        referredUserId: { $exists: true }
+        userId,
+        referredUserId: { $exists: true, $ne: null }
       });
-      
-      console.log('📊 Referral count for user', userId, ':', count);
-      return count;
+
+      console.log('📊 Referral count:', count);
+      return count || 0;
     } catch (error) {
-      console.error('Error getting referral count:', error);
+      console.error('❌ Error getting referral count:', error);
       return 0;
     }
   }
@@ -343,18 +343,17 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      
+
       console.log('🔍 Looking for referral code:', referralCode);
-      
+
       // Only find main referral codes (not used ones) and that are valid format
       const referral = await Referral.findOne({ 
         referralCode,
-        referralCode: { $regex: /^REF-/ },
         referredUserId: { $exists: false }
       }).lean();
-      
+
       console.log('📋 Found referral:', referral);
-      
+
       return referral ? {
         id: referral._id.toString(),
         userId: referral.userId.toString(),
@@ -372,9 +371,9 @@ export class MongoDBStorage implements IMongoStorage {
     try {
       await this.initializeDatabase(); // Ensure DB is connected
       const { Referral } = await import('./mongodb');
-      
+
       console.log('🎯 Creating referral record:', { referrerId, referredUserId, referralCode });
-      
+
       // Create a new referral record for the successful referral
       const referral = new Referral({
         userId: referrerId,
@@ -383,7 +382,7 @@ export class MongoDBStorage implements IMongoStorage {
         isCompleted: true
       });
       await referral.save();
-      
+
       console.log('✅ Referral record created successfully');
     } catch (error) {
       console.error('Error creating referral record:', error);
