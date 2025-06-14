@@ -5,7 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { APP_CONFIG } from "./config.js";
 import { registerRoutes } from "./routes.js";
-import { MongoDBStorage } from "./mongodb-storage.js";
+import { MongoDBStorage } from "./mongodb-storage";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
