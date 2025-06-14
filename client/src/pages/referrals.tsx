@@ -24,59 +24,22 @@ export default function Referrals() {
     queryFn: async () => {
       try {
         const response = await fetch("/api/referrals", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
+          credentials: "include"
         });
 
-        console.log("Response status:", response.status);
-
         if (!response.ok) {
-          if (response.status === 401) {
-            throw new Error("Please login to view referral data");
-          }
-          throw new Error(`HTTP ${response.status}: Failed to fetch referral data`);
+          throw new Error(`Failed to load data: ${response.status}`);
         }
-
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          console.error("Server returned non-JSON response");
-          const textResponse = await response.text();
-          console.error("Response text:", textResponse);
-          throw new Error("Server returned invalid response format");
-        }
-
-        const data = await response.json();
-        console.log("Referral data received:", data);
         
-        // Validate the response structure and provide defaults
-        const validatedData = {
-          referralCode: data.referralCode || `REF-LOADING-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
-          referralCount: data.referralCount || 0,
-          isEligibleForDiscount: data.isEligibleForDiscount || false,
-          hasClaimedDiscount: data.hasClaimedDiscount || false
-        };
-        
-        console.log("Validated referral data:", validatedData);
-        return validatedData;
+        return response.json();
       } catch (error) {
         console.error("Fetch error:", error);
-        throw error;
+        throw new Error("Failed to fetch referral data");
       }
     },
-    enabled: isAuthenticated,
-    retry: (failureCount, error) => {
-      // Don't retry on auth errors
-      if (error?.message?.includes("401") || error?.message?.includes("login")) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    retry: 2,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000
   });
 
   const claimRewardMutation = useMutation({
@@ -131,8 +94,6 @@ export default function Referrals() {
       </div>
     );
   }
-
-
 
   const handleClaimReward = () => {
     claimRewardMutation.mutate();
@@ -349,12 +310,12 @@ export default function Referrals() {
               Your Referral Code
             </h3>
 
-            {/* Show error state if there's an error */}
+            {/* Show error state */}
             {error && (
               <div className="text-center mb-8">
                 <div className="p-6 rounded-lg border-2 border-red-500/50 bg-red-500/10">
                   <p className="text-red-400 font-semibold">
-                    {error?.message || "Failed to load referral code. Please refresh the page."}
+                    {error.message}
                   </p>
                   <Button 
                     onClick={() => refetch()} 
@@ -371,50 +332,44 @@ export default function Referrals() {
             {isLoading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gold"></div>
-                <p className="text-cream/70 mt-4">Generating your referral code...</p>
+                <p className="text-cream/70 mt-4">Loading your referral code...</p>
               </div>
             ) : (
-              <div></div>
-            )}
-
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
-                <div className="text-cream/70 text-lg mb-3 font-medium">Share this referral code:</div>
-                <div className="text-cream font-mono text-2xl break-all bg-black/30 p-6 rounded-lg border text-center">
-                  {isLoading ? (
-                    <span className="text-cream/50 animate-pulse">
-                      <i className="fas fa-spinner fa-spin mr-2"></i>
-                      Generating your code...
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div className="flex-1 bg-charcoal-dark border border-gold/20 rounded-xl p-6">
+                  <div className="text-cream/70 text-lg mb-3 font-medium">
+                    Share this referral code:
+                  </div>
+                  <div className="text-cream font-mono text-2xl break-all bg-black/30 p-6 rounded-lg border text-center">
+                    <span className="select-all text-gold font-bold">
+                      {referralData?.referralCode || "REF-LOADING-CODE"}
                     </span>
-                  ) : referralData?.referralCode ? (
-                    <span className="select-all text-gold font-bold">{referralData.referralCode}</span>
-                  ) : (
-                    <span className="text-cream/50">Code not available</span>
-                  )}
+                  </div>
+                  <div className="text-cream/50 text-sm mt-3 text-center">
+                    Friends can use this code during registration
+                  </div>
                 </div>
-                <div className="text-cream/50 text-sm mt-3 text-center">
-                  Friends can use this code during registration
-                </div>
+                
+                <Button 
+                  onClick={() => {
+                    if (referralData?.referralCode) {
+                      navigator.clipboard.writeText(referralData.referralCode);
+                      setCopiedLink(true);
+                      toast({
+                        title: "Code Copied!",
+                        description: "Referral code copied to clipboard",
+                      });
+                      setTimeout(() => setCopiedLink(false), 3000);
+                    }
+                  }}
+                  className={`btn-primary text-xl px-10 py-6 self-start lg:self-center whitespace-nowrap transform hover:scale-105 transition-all duration-300 ${copiedLink ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                  disabled={!referralData?.referralCode}
+                >
+                  <i className={`fas ${copiedLink ? 'fa-check' : 'fa-copy'} mr-3 text-xl`}></i>
+                  {copiedLink ? 'Copied!' : 'Copy Code'}
+                </Button>
               </div>
-              <Button 
-                onClick={() => {
-                  if (referralData?.referralCode) {
-                    navigator.clipboard.writeText(referralData.referralCode);
-                    setCopiedLink(true);
-                    toast({
-                      title: "Code Copied!",
-                      description: "Referral code copied to clipboard",
-                    });
-                    setTimeout(() => setCopiedLink(false), 3000);
-                  }
-                }}
-                className={`btn-primary text-xl px-10 py-6 self-start lg:self-center whitespace-nowrap transform hover:scale-105 transition-all duration-300 ${copiedLink ? 'bg-green-500 hover:bg-green-600' : ''}`}
-                disabled={!referralData?.referralCode}
-              >
-                <i className={`fas ${copiedLink ? 'fa-check' : 'fa-copy'} mr-3 text-xl`}></i>
-                {copiedLink ? 'Copied!' : 'Copy Code'}
-              </Button>
-            </div>
+            )}
           </div>
 
           {/* How it Works */}
