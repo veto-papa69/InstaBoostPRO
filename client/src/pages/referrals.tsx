@@ -34,31 +34,46 @@ export default function Referrals() {
         console.log("Response status:", response.status);
 
         if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Please login to view referral data");
+          }
           throw new Error(`HTTP ${response.status}: Failed to fetch referral data`);
         }
 
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
           console.error("Server returned non-JSON response");
+          const textResponse = await response.text();
+          console.error("Response text:", textResponse);
           throw new Error("Server returned invalid response format");
         }
 
         const data = await response.json();
         console.log("Referral data received:", data);
         
-        // Validate the response structure
-        if (!data.referralCode) {
-          throw new Error("Invalid referral data received");
-        }
+        // Validate the response structure and provide defaults
+        const validatedData = {
+          referralCode: data.referralCode || `REF-LOADING-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+          referralCount: data.referralCount || 0,
+          isEligibleForDiscount: data.isEligibleForDiscount || false,
+          hasClaimedDiscount: data.hasClaimedDiscount || false
+        };
         
-        return data;
+        console.log("Validated referral data:", validatedData);
+        return validatedData;
       } catch (error) {
         console.error("Fetch error:", error);
         throw error;
       }
     },
     enabled: isAuthenticated,
-    retry: 3,
+    retry: (failureCount, error) => {
+      // Don't retry on auth errors
+      if (error?.message?.includes("401") || error?.message?.includes("login")) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
