@@ -248,40 +248,62 @@ export class MongoDBStorage implements IMongoStorage {
     }
   }
 
-  // Referral methods
-  async createReferral(referralData: any): Promise<any> {
+  async createReferral(data: any) {
     try {
-      const referral = new Referral(referralData);
+      console.log('🎯 Creating referral with data:', data);
+
+      // Check if referral code already exists
+      const existingReferral = await Referral.findOne({ referralCode: data.referralCode });
+      if (existingReferral) {
+        console.log('⚠️ Referral code already exists, generating new one');
+        // Generate a new unique code
+        const timestamp = Date.now().toString(36);
+        data.referralCode = `REF-${data.referralCode.split('-')[1]}-${timestamp.toUpperCase()}`;
+      }
+
+      const referral = new Referral({
+        userId: data.userId,
+        referralCode: data.referralCode,
+        isCompleted: data.isCompleted || false,
+        createdAt: new Date()
+      });
+
       const savedReferral = await referral.save();
+      console.log('✅ Referral created successfully:', savedReferral);
+
       return {
         id: savedReferral._id.toString(),
-        userId: savedReferral.userId,
+        userId: savedReferral.userId.toString(),
         referralCode: savedReferral.referralCode,
-        referredUserId: savedReferral.referredUserId,
-        isCompleted: savedReferral.isCompleted
+        isCompleted: savedReferral.isCompleted || false
       };
     } catch (error) {
-      console.error('Error creating referral:', error);
+      console.error('❌ Error creating referral:', error);
       throw error;
     }
   }
 
-  async getReferralByUserId(userId: string): Promise<any> {
+  async getReferralByUserId(userId: string) {
     try {
+      console.log('📋 Getting referral by user ID:', userId);
+
+      // Find the user's main referral code (where they are the referrer, not the referred)
       const referral = await Referral.findOne({ 
-        userId, 
+        userId: userId,
         referredUserId: { $exists: false }
       }).lean();
 
+      console.log('📋 Found referral record:', referral);
+
       return referral ? {
         id: referral._id.toString(),
-        userId: referral.userId,
+        userId: referral.userId.toString(),
         referralCode: referral.referralCode,
-        referredUserId: referral.referredUserId,
-        isCompleted: referral.isCompleted
+        referredUserId: referral.referredUserId ? referral.referredUserId.toString() : null,
+        isCompleted: referral.isCompleted || false
       } : null;
     } catch (error) {
-      console.error('Error getting referral by user ID:', error);
+      console.error('❌ Error getting referral by user ID:', error);
       return null;
     }
   }
@@ -350,15 +372,15 @@ export class MongoDBStorage implements IMongoStorage {
 
   async getReferralCount(userId: string): Promise<number> {
     try {
-      console.log('🔍 Getting referral count for userId:', userId);
+      console.log('📊 Getting referral count for user:', userId);
 
-      // Count referrals where this user referred others (has referredUserId)
+      // Count all referral records where this user was the referrer and someone actually joined
       const count = await Referral.countDocuments({ 
-        userId,
+        userId: userId,
         referredUserId: { $exists: true, $ne: null }
       });
 
-      console.log('📊 Referral count:', count);
+      console.log('📊 Referral count result:', count);
       return count || 0;
     } catch (error) {
       console.error('❌ Error getting referral count:', error);
