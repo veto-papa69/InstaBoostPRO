@@ -28,27 +28,29 @@ export default function Referrals() {
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include", // Use cookies for session instead of token
+          credentials: "include",
         });
 
         console.log("Response status:", response.status);
-        console.log("Response headers:", response.headers.get("content-type"));
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Error response:", errorText);
-          throw new Error(`HTTP ${response.status}: ${errorText}`);
+          throw new Error(`HTTP ${response.status}: Failed to fetch referral data`);
         }
 
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
-          const responseText = await response.text();
-          console.error("Non-JSON response:", responseText);
-          throw new Error("Server returned non-JSON response");
+          console.error("Server returned non-JSON response");
+          throw new Error("Server returned invalid response format");
         }
 
         const data = await response.json();
         console.log("Referral data received:", data);
+        
+        // Validate the response structure
+        if (!data.referralCode) {
+          throw new Error("Invalid referral data received");
+        }
+        
         return data;
       } catch (error) {
         console.error("Fetch error:", error);
@@ -56,8 +58,10 @@ export default function Referrals() {
       }
     },
     enabled: isAuthenticated,
-    retry: 2,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+    retry: 3,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 5000),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
   const claimRewardMutation = useMutation({
