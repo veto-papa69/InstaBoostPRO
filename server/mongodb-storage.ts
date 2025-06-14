@@ -1,541 +1,491 @@
-import mongoose from 'mongoose';
+import { 
+  User, 
+  Order, 
+  Payment, 
+  Service, 
+  LoginLog,
+  Referral,
+  connectMongoDB,
+  type IUser,
+  type IOrder,
+  type IPayment,
+  type IService,
+  type ILoginLog
+} from "./mongodb";
 
-// MongoDB connection with your actual credentials
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://instaboost_user:uX1YzKjiOETNhyYj@cluster0.tolxjiz.mongodb.net/instaboost?retryWrites=true&w=majority&appName=Cluster0';
+export interface IMongoStorage {
+  // Database initialization
+  initializeDatabase(): Promise<void>;
 
-// User Schema
-const userSchema = new mongoose.Schema({
-  uid: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  instagramUsername: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
-  walletBalance: {
-    type: Number,
-    default: 0,
-    min: 0
-  },
-  bonusClaimed: {
-    type: Boolean,
-    default: false
-  },
-  hasClaimedDiscount: { type: Boolean, default: false },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  // User operations
+  getUser(id: string): Promise<IUser | null>;
+  getUserByUsername(username: string): Promise<IUser | null>;
+  getUserByInstagramUsername(username: string): Promise<IUser | null>;
+  createUser(userData: Omit<IUser, '_id' | 'createdAt'>): Promise<IUser>;
+  updateUserBalance(userId: string, newBalance: number): Promise<void>;
+  markBonusClaimed(userId: string): Promise<void>;
 
-// Order Schema
-const orderSchema = new mongoose.Schema({
-  orderId: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  serviceName: {
-    type: String,
-    required: true
-  },
-  instagramUsername: {
-    type: String,
-    required: true
-  },
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1
-  },
-  price: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  status: {
-    type: String,
-    enum: ['Processing', 'Completed', 'Failed', 'Pending'],
-    default: 'Processing'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  // Order operations
+  createOrder(orderData: Omit<IOrder, '_id' | 'createdAt'>): Promise<IOrder>;
+  getUserOrders(userId: string): Promise<IOrder[]>;
 
-// Payment Schema
-const paymentSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  amount: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  utrNumber: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  paymentMethod: {
-    type: String,
-    required: true
-  },
-  status: {
-    type: String,
-    enum: ['Pending', 'Approved', 'Rejected'],
-    default: 'Pending'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  // Payment operations
+  createPayment(paymentData: Omit<IPayment, '_id' | 'createdAt'>): Promise<IPayment>;
+  getUserPayments(userId: string): Promise<IPayment[]>;
+  getPayment(id: string): Promise<IPayment | null>;
+  updatePaymentStatus(id: string, status: string): Promise<void>;
 
-// Service Schema
-const serviceSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  category: {
-    type: String,
-    required: true,
-    index: true
-  },
-  rate: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  minOrder: {
-    type: Number,
-    required: true,
-    min: 1
-  },
-  maxOrder: {
-    type: Number,
-    required: true,
-    min: 1
-  },
-  deliveryTime: {
-    type: String,
-    required: true
-  },
-  active: {
-    type: Boolean,
-    default: true,
-    index: true
-  }
-});
+  // Service operations
+  getServices(): Promise<IService[]>;
+  initializeServices(): Promise<void>;
 
-// Login Log Schema
-const loginLogSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true
-  },
-  instagramUsername: {
-    type: String,
-    required: true
-  },
-  loginCount: {
-    type: Number,
-    required: true,
-    min: 1
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  // Login tracking operations
+  logUserLogin(userId: string, instagramUsername: string): Promise<number>;
+  getUserLoginCount(userId: string): Promise<number>;
 
-// Referral Schema - UPDATED
-const referralSchema = new mongoose.Schema({
-  userId: { 
-    type: String, 
-    required: true,
-    index: true
-  },
-  referralCode: { 
-    type: String, 
-    required: true, 
-    unique: true 
-  },
-  referredUserId: { 
-    type: String, 
-    default: null,
-    index: true
-  },
-  isCompleted: { 
-    type: Boolean, 
-    default: false,
-    index: true
-  },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
-  }
-});
+  // Referral methods
+  getUserReferralData(userId: string): Promise<any>;
+  getReferralCount(userId: string): Promise<number>;
+  createReferral(referralData: any): Promise<any>;
+  getReferralByUserId(userId: string): Promise<any>;
+  getReferralByCode(referralCode: string): Promise<any>;
+  createReferralRecord(referrerId: string, referredUserId: string, referralCode: string): Promise<void>;
+  updateUserDiscountStatus(userId: string, hasClaimedDiscount: boolean): Promise<void>;
+}
 
-// Create compound indexes for better performance and uniqueness
-referralSchema.index({ userId: 1, referredUserId: 1 }, { unique: true });
-referralSchema.index({ referralCode: 1 }, { unique: true });
-
-// Ensure referral code uniqueness
-referralSchema.pre('save', async function(next) {
-  if (this.isNew && this.referralCode) {
-    const existing = await this.constructor.findOne({ referralCode: this.referralCode });
-    if (existing) {
-      const timestamp = Date.now().toString(36).toUpperCase();
-      this.referralCode = `${this.referralCode}-${timestamp}`;
+export class MongoDBStorage implements IMongoStorage {
+  async initializeDatabase(): Promise<void> {
+    try {
+      console.log('🔄 Initializing MongoDB database...');
+      await connectMongoDB();
+      console.log('✅ MongoDB database initialization completed');
+    } catch (error) {
+      console.error('❌ MongoDB database initialization failed:', error);
+      throw error;
     }
   }
-  next();
-});
 
-const discountRewardSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
-  hasClaimedDiscount: { type: Boolean, default: false },
-  claimedAt: { type: Date },
-  createdAt: { type: Date, default: Date.now }
-});
+  async getUser(id: string): Promise<IUser | null> {
+    try {
+      const user = await User.findById(id).lean();
+      if (!user) return null;
+      return {
+        ...user,
+        _id: user._id.toString()
+      } as IUser;
+    } catch (error) {
+      console.error('Error getting user by ID:', error);
+      return null;
+    }
+  }
 
-// Create Models - Prevent overwrite errors
-export const User = mongoose.models.User || mongoose.model('User', userSchema);
-export const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
-export const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
-export const Service = mongoose.models.Service || mongoose.model('Service', serviceSchema);
-export const LoginLog = mongoose.models.LoginLog || mongoose.model('LoginLog', loginLogSchema);
-export const Referral = mongoose.models.Referral || mongoose.model('Referral', referralSchema);
-export const DiscountReward = mongoose.models.DiscountReward || mongoose.model('DiscountReward', discountRewardSchema);
+  async getUserByUsername(username: string): Promise<IUser | null> {
+    try {
+      const user = await User.findOne({ instagramUsername: username }).lean();
+      if (!user) return null;
+      return {
+        ...user,
+        _id: user._id.toString()
+      } as IUser;
+    } catch (error) {
+      console.error('Error getting user by username:', error);
+      return null;
+    }
+  }
 
-// MongoDB Connection Function
-export async function connectMongoDB() {
-  try {
-    if (mongoose.connection.readyState === 0) {
-      console.log('🔄 Connecting to MongoDB...');
+  async getUserByInstagramUsername(username: string): Promise<IUser | null> {
+    try {
+      const user = await User.findOne({ instagramUsername: username }).lean();
+      if (!user) return null;
+      return {
+        ...user,
+        _id: user._id.toString()
+      } as IUser;
+    } catch (error) {
+      console.error('Error getting user by Instagram username:', error);
+      return null;
+    }
+  }
 
-      await mongoose.connect(MONGODB_URI, {
-        maxPoolSize: 10,
-        serverSelectionTimeoutMS: 5000,
-        socketTimeoutMS: 45000,
-        bufferCommands: false
+  async createUser(userData: Omit<IUser, '_id' | 'createdAt'>): Promise<IUser> {
+    try {
+      const user = new User(userData);
+      const savedUser = await user.save();
+      return {
+        ...savedUser.toObject(),
+        _id: savedUser._id.toString()
+      } as IUser;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  async updateUserBalance(userId: string, newBalance: number): Promise<void> {
+    try {
+      await User.findByIdAndUpdate(userId, { walletBalance: newBalance });
+    } catch (error) {
+      console.error('Error updating user balance:', error);
+      throw error;
+    }
+  }
+
+  async markBonusClaimed(userId: string): Promise<void> {
+    try {
+      await User.findByIdAndUpdate(userId, { bonusClaimed: true });
+    } catch (error) {
+      console.error('Error marking bonus claimed:', error);
+      throw error;
+    }
+  }
+
+  async createOrder(orderData: Omit<IOrder, '_id' | 'createdAt'>): Promise<IOrder> {
+    try {
+      const order = new Order(orderData);
+      const savedOrder = await order.save();
+      return savedOrder.toObject() as IOrder;
+    } catch (error) {
+      console.error('Error creating order:', error);
+      throw error;
+    }
+  }
+
+  async getUserOrders(userId: string): Promise<IOrder[]> {
+    try {
+      const orders = await Order.find({ userId }).sort({ createdAt: -1 }).lean();
+      return orders as IOrder[];
+    } catch (error) {
+      console.error('Error getting user orders:', error);
+      return [];
+    }
+  }
+
+  async createPayment(paymentData: Omit<IPayment, '_id' | 'createdAt'>): Promise<IPayment> {
+    try {
+      const payment = new Payment(paymentData);
+      const savedPayment = await payment.save();
+      return savedPayment.toObject() as IPayment;
+    } catch (error) {
+      console.error('Error creating payment:', error);
+      throw error;
+    }
+  }
+
+  async getUserPayments(userId: string): Promise<IPayment[]> {
+    try {
+      const payments = await Payment.find({ userId }).sort({ createdAt: -1 }).lean();
+      return payments as IPayment[];
+    } catch (error) {
+      console.error('Error getting user payments:', error);
+      return [];
+    }
+  }
+
+  async getPayment(id: string): Promise<IPayment | null> {
+    try {
+      const payment = await Payment.findById(id).lean();
+      return payment as IPayment | null;
+    } catch (error) {
+      console.error('Error getting payment:', error);
+      return null;
+    }
+  }
+
+  async updatePaymentStatus(id: string, status: string): Promise<void> {
+    try {
+      await Payment.findByIdAndUpdate(id, { status });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      throw error;
+    }
+  }
+
+  async getServices(): Promise<IService[]> {
+    try {
+      const services = await Service.find({ active: true }).sort({ category: 1, name: 1 }).lean();
+      return services as IService[];
+    } catch (error) {
+      console.error('Error getting services:', error);
+      return [];
+    }
+  }
+
+  async initializeServices(): Promise<void> {
+    try {
+      // Services are automatically initialized in the MongoDB connection
+      console.log('✅ Services initialization completed (handled by MongoDB connection)');
+    } catch (error) {
+      console.error('Error initializing services:', error);
+    }
+  }
+
+  async logUserLogin(userId: string, instagramUsername: string): Promise<number> {
+    try {
+      const currentCount = await this.getUserLoginCount(userId);
+      const newCount = currentCount + 1;
+
+      const loginLog = new LoginLog({
+        userId,
+        instagramUsername,
+        loginCount: newCount
       });
 
-      console.log('✅ MongoDB connected successfully');
-      console.log(`📊 Database: ${mongoose.connection.name}`);
+      await loginLog.save();
+      return newCount;
+    } catch (error) {
+      console.error('Error logging user login:', error);
+      return 1;
+    }
+  }
 
-      // Ensure all indexes are created
-      try {
-        await User.createIndexes();
-        await Referral.createIndexes();
-        await Order.createIndexes();
-        await Payment.createIndexes();
-        await Service.createIndexes();
-        console.log('✅ Database indexes created successfully');
-      } catch (indexError) {
-        console.log('⚠️ Index creation warning (this is normal):', indexError.message);
+  async getUserLoginCount(userId: string): Promise<number> {
+    try {
+      const count = await LoginLog.countDocuments({ userId });
+      return count;
+    } catch (error) {
+      console.error('Error getting user login count:', error);
+      return 0;
+    }
+  }
+
+  async createReferral(data: any) {
+    try {
+      console.log('🎯 Creating referral with data:', data);
+
+      // Convert userId to string
+      const userIdStr = data.userId.toString();
+      let referralCode = data.referralCode;
+
+      // Check if referral code already exists and generate unique one if needed
+      let attempts = 0;
+      while (attempts < 5) {
+        const existingReferral = await Referral.findOne({ referralCode });
+        if (!existingReferral) {
+          break; // Code is unique
+        }
+        
+        console.log('⚠️ Referral code already exists, generating new one');
+        const timestamp = Date.now().toString(36).toUpperCase();
+        const randomSuffix = Math.random().toString(36).substr(2, 4).toUpperCase();
+        referralCode = `REF-${data.referralCode.split('-')[1] || userIdStr}-${timestamp}-${randomSuffix}`;
+        attempts++;
       }
 
-      // Initialize default services if collection is empty
-      await initializeServices();
+      const referral = new Referral({
+        userId: userIdStr,
+        referralCode: referralCode,
+        isCompleted: data.isCompleted || false,
+        createdAt: new Date()
+      });
 
-    } else {
-      console.log('✅ MongoDB already connected');
+      const savedReferral = await referral.save();
+      console.log('✅ Referral created successfully:', savedReferral);
+
+      return {
+        id: savedReferral._id.toString(),
+        userId: savedReferral.userId,
+        referralCode: savedReferral.referralCode,
+        isCompleted: savedReferral.isCompleted || false
+      };
+    } catch (error) {
+      console.error('❌ Error creating referral:', error);
+      
+      // Return a fallback result instead of throwing
+      return {
+        id: 'error',
+        userId: data.userId.toString(),
+        referralCode: data.referralCode || `REF-ERROR-${Math.random().toString(36).substr(2, 6).toUpperCase()}`,
+        isCompleted: false
+      };
     }
-  } catch (error) {
-    console.error('❌ MongoDB connection failed:', error);
-    throw error;
   }
-}
 
-// Initialize default services
-async function initializeServices() {
-  try {
-    const serviceCount = await Service.countDocuments();
+  async getReferralByUserId(userId: string) {
+    try {
+      console.log('📋 Getting referral by user ID:', userId);
 
-    if (serviceCount === 0) {
-      console.log('🔄 Initializing default services...');
+      // Find the user's main referral code (where they are the referrer, not the referred)
+      const referral = await Referral.findOne({ 
+        userId: userId,
+        referredUserId: { $exists: false }
+      }).lean();
 
-      const defaultServices = [
-        // Followers Services (increased by ₹20)
-        {
-          name: "Instagram Followers - Indian",
-          category: "Followers",
-          rate: 26.00,
-          minOrder: 770,
-          maxOrder: 100000,
-          deliveryTime: "0-6 hours",
-          active: true
-        },
-        {
-          name: "Instagram Followers - USA",
-          category: "Followers", 
-          rate: 27.00,
-          minOrder: 741,
-          maxOrder: 50000,
-          deliveryTime: "0-12 hours",
-          active: true
-        },
-        {
-          name: "Instagram Followers - HQ Non Drop",
-          category: "Followers",
-          rate: 31.00,
-          minOrder: 646,
-          maxOrder: 25000,
-          deliveryTime: "0-24 hours",
-          active: true
-        },
-        {
-          name: "Instagram Followers - Global Mix",
-          category: "Followers",
-          rate: 24.50,
-          minOrder: 817,
-          maxOrder: 200000,
-          deliveryTime: "0-6 hours", 
-          active: true
-        },
-        {
-          name: "Instagram Followers - Bot Followers",
-          category: "Followers",
-          rate: 15.00,
-          minOrder: 1334,
-          maxOrder: 150000,
-          deliveryTime: "0-3 hours",
-          active: true
-        },
+      console.log('📋 Found referral record:', referral);
 
-        // Likes Services (increased by ₹10)
-        {
-          name: "Instagram Likes - Bot Likes",
-          category: "Likes",
-          rate: 12.00,
-          minOrder: 1667,
-          maxOrder: 100000,
-          deliveryTime: "0-1 hour",
-          active: true
-        },
-        {
-          name: "Instagram Likes - Non Drop",
-          category: "Likes",
-          rate: 14.50,
-          minOrder: 1380,
-          maxOrder: 50000,
-          deliveryTime: "0-3 hours",
-          active: true
-        },
-        {
-          name: "Instagram Likes - Only Girl Accounts",
-          category: "Likes",
-          rate: 16.00,
-          minOrder: 1250,
-          maxOrder: 25000,
-          deliveryTime: "0-6 hours",
-          active: true
-        },
-        {
-          name: "Instagram Likes - Indian Real",
-          category: "Likes",
-          rate: 13.50,
-          minOrder: 1482,
-          maxOrder: 30000,
-          deliveryTime: "0-2 hours",
-          active: true
-        },
+      return referral ? {
+        id: referral._id.toString(),
+        userId: referral.userId.toString(),
+        referralCode: referral.referralCode,
+        referredUserId: referral.referredUserId ? referral.referredUserId.toString() : null,
+        isCompleted: referral.isCompleted || false
+      } : null;
+    } catch (error) {
+      console.error('❌ Error getting referral by user ID:', error);
+      return null;
+    }
+  }
 
-        // Views Services (increased by ₹10)
-        {
-          name: "Instagram Video Views - Fast",
-          category: "Views",
-          rate: 11.20,
-          minOrder: 1786,
-          maxOrder: 1000000,
-          deliveryTime: "0-30 minutes",
-          active: true
-        },
-        {
-          name: "Instagram Story Views - Premium",
-          category: "Views",
-          rate: 12.80,
-          minOrder: 1563,
-          maxOrder: 50000,
-          deliveryTime: "0-2 hours",
-          active: true
-        },
-        {
-          name: "Instagram Reel Views - High Quality",
-          category: "Views",
-          rate: 11.50,
-          minOrder: 1740,
-          maxOrder: 500000,
-          deliveryTime: "0-1 hour",
-          active: true
-        },
+  async getUserReferralData(userId: string) {
+    try {
+      console.log('📋 Getting referral data for user:', userId);
 
-        // Comments Services (increased by ₹10)
-        {
-          name: "Instagram Comments - Random Positive",
-          category: "Comments",
-          rate: 18.00,
-          minOrder: 112,
-          maxOrder: 1000,
-          deliveryTime: "1-6 hours",
-          active: true
-        },
-        {
-          name: "Instagram Comments - Custom Text",
-          category: "Comments",
-          rate: 25.00,
-          minOrder: 80,
-          maxOrder: 500,
-          deliveryTime: "2-24 hours",
-          active: true
-        },
-        {
-          name: "Instagram Comments - Emoji Only",
-          category: "Comments",
-          rate: 15.00,
-          minOrder: 134,
-          maxOrder: 2000,
-          deliveryTime: "0-3 hours",
-          active: true
+      // Convert ObjectId to string if needed
+      const userIdStr = userId.toString();
+
+      // First check if user has any referral code (as referrer) - only check for main referral code, not used ones
+      let referral = await Referral.findOne({ 
+        userId: userIdStr, 
+        referredUserId: { $exists: false }
+      }).lean();
+
+      console.log('📋 Found existing referral:', referral);
+
+      if (!referral) {
+        // If no referral found, create one automatically
+        const user = await this.getUser(userId);
+        if (user) {
+          const referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+          console.log('🎯 Creating new referral code:', referralCode);
+
+          try {
+            const newReferral = new Referral({
+              userId: userIdStr,
+              referralCode,
+              isCompleted: false,
+              createdAt: new Date()
+            });
+            await newReferral.save();
+            referral = newReferral.toObject();
+            console.log('✅ New referral created successfully:', referral);
+          } catch (saveError) {
+            console.error('❌ Error saving new referral:', saveError);
+            // Return a basic structure even if save fails
+            referral = {
+              _id: 'temp',
+              userId: userIdStr,
+              referralCode,
+              isCompleted: false
+            };
+          }
         }
-      ];
+      }
 
-      await Service.insertMany(defaultServices);
-      console.log('✅ Default services initialized successfully');
-    } else {
-      console.log(`✅ Services already exist (${serviceCount} services)`);
-    }
-  } catch (error) {
-    console.error('❌ Failed to initialize services:', error);
-  }
-}
+      // Get count of referred users - count all successful referrals where this user was the referrer
+      const referredCount = await Referral.countDocuments({
+        userId: userIdStr,
+        referredUserId: { $exists: true, $ne: null },
+        isCompleted: true
+      });
 
-// Disconnect function
-export async function disconnectMongoDB() {
-  try {
-    await mongoose.disconnect();
-    console.log('✅ MongoDB disconnected');
-  } catch (error) {
-    console.error('❌ MongoDB disconnect error:', error);
-  }
-}
+      const result = referral ? {
+        id: referral._id ? referral._id.toString() : 'temp',
+        referralCode: referral.referralCode,
+        referredCount: referredCount,
+        totalEarnings: (referredCount * 5).toFixed(2) // $5 per referral
+      } : {
+        id: '',
+        referralCode: 'Code not available',
+        referredCount: 0,
+        totalEarnings: '0.00'
+      };
 
-// Type definitions for better TypeScript support
-export interface IUser {
-  _id?: string;
-  uid: string;
-  instagramUsername: string;
-  password: string;
-  walletBalance: number;
-  bonusClaimed: boolean;
-  hasClaimedDiscount: boolean;
-  createdAt?: Date;
-}
-
-export interface IOrder {
-  _id?: string;
-  orderId: string;
-  userId: string;
-  serviceName: string;
-  instagramUsername: string;
-  quantity: number;
-  price: number;
-  status: 'Processing' | 'Completed' | 'Failed' | 'Pending';
-  createdAt?: Date;
-}
-
-export interface IPayment {
-  _id?: string;
-  userId: string;
-  amount: number;
-  utrNumber: string;
-  paymentMethod: string;
-  status: 'Pending' | 'Approved' | 'Rejected';
-  createdAt?: Date;
-}
-
-export interface IService {
-  _id?: string;
-  name: string;
-  category: string;
-  rate: number;
-  minOrder: number;
-  maxOrder: number;
-  deliveryTime: string;
-  active: boolean;
-}
-
-export interface ILoginLog {
-  _id?: string;
-  userId: string;
-  instagramUsername: string;
-  loginCount: number;
-  createdAt?: Date;
-}
-
-async function markBonusClaimed(userId: number): Promise<void> {
-    const user = await User.findOne({ id: userId });
-    if (user) {
-      user.bonusClaimed = true;
-      await user.save();
+      console.log('📤 Returning referral data:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error getting user referral data:', error);
+      
+      // Create a fallback with a valid referral code
+      const user = await this.getUser(userId).catch(() => null);
+      const fallbackCode = user ? `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}` : `REF-ERROR-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      
+      return {
+        id: '',
+        referralCode: fallbackCode,
+        referredCount: 0,
+        totalEarnings: '0.00'
+      };
     }
   }
 
-  async function getUserReferralData(userId: number): Promise<any> {
-    return await Referral.findOne({ userId });
-  }
+  async getReferralCount(userId: string): Promise<number> {
+    try {
+      console.log('📊 Getting referral count for user:', userId);
 
-  async function createUserReferral(userId: number, referralCode: string): Promise<any> {
-    const referral = new Referral({
-      userId,
-      referralCode
-    });
-    await referral.save();
-    return referral;
-  }
+      // Convert ObjectId to string if needed
+      const userIdStr = userId.toString();
 
-  async function getReferralCount(userId: number): Promise<number> {
-    return await Referral.countDocuments({ 
-      userId, 
-      isCompleted: true 
-    });
-  }
+      // Count all referral records where this user was the referrer and someone actually joined
+      const count = await Referral.countDocuments({ 
+        userId: userIdStr,
+        referredUserId: { $exists: true, $ne: null },
+        isCompleted: true
+      });
 
-  async function hasClaimedDiscount(userId: number): Promise<boolean> {
-    const user = await User.findOne({ id: userId });
-    return user?.hasClaimedDiscount || false;
-  }
-
-  async function claimDiscountReward(userId: number): Promise<void> {
-    const user = await User.findOne({ id: userId });
-    if (user) {
-      user.hasClaimedDiscount = true;
-      await user.save();
+      console.log('📊 Referral count result:', count);
+      return count || 0;
+    } catch (error) {
+      console.error('❌ Error getting referral count:', error);
+      return 0;
     }
   }
+
+  async getReferralByCode(referralCode: string): Promise<any> {
+    try {
+      console.log('🔍 Looking for referral code:', referralCode);
+
+      // Only find main referral codes (not used ones) and that are valid format
+      const referral = await Referral.findOne({ 
+        referralCode,
+        referredUserId: { $exists: false }
+      }).lean();
+
+      console.log('📋 Found referral:', referral);
+
+      return referral ? {
+        id: referral._id.toString(),
+        userId: referral.userId.toString(),
+        referralCode: referral.referralCode,
+        referredUserId: referral.referredUserId ? referral.referredUserId.toString() : null,
+        isCompleted: referral.isCompleted
+      } : null;
+    } catch (error) {
+      console.error('Error getting referral by code:', error);
+      return null;
+    }
+  }
+
+  async createReferralRecord(referrerId: string, referredUserId: string, referralCode: string): Promise<void> {
+    try {
+      console.log('🎯 Creating referral record:', { referrerId, referredUserId, referralCode });
+
+      // Create a new referral record for the successful referral
+      const referral = new Referral({
+        userId: referrerId,
+        referralCode: `USED-${referralCode}-${Date.now()}`, // Create unique code for this referral instance
+        referredUserId,
+        isCompleted: true
+      });
+      await referral.save();
+
+      console.log('✅ Referral record created successfully');
+    } catch (error) {
+      console.error('Error creating referral record:', error);
+      throw error;
+    }
+  }
+
+  async updateUserDiscountStatus(userId: string, hasClaimedDiscount: boolean): Promise<void> {
+    try {
+      await User.findByIdAndUpdate(userId, { hasClaimedDiscount });
+    } catch (error) {
+      console.error('Error updating user discount status:', error);
+      throw error;
+    }
+  }
+}
+
+// Create and export the storage instance
+export const mongoStorage = new MongoDBStorage();
+
+// Also export the class itself for any other imports
+export { MongoDBStorage };
