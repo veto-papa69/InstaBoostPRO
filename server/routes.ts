@@ -797,53 +797,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("👤 User found:", user.uid);
 
-      // Get or create referral record
-      let referralRecord = await storage.getReferralByUserId(user.id);
-      let referralCode = '';
+      // Get referral data using the improved method
+      const referralData = await storage.getUserReferralData(user._id || user.id);
+      
+      console.log("📊 Referral data from storage:", referralData);
 
-      if (!referralRecord) {
-        // Generate unique referral code
-        referralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      // Ensure we have a valid referral code
+      let finalReferralCode = referralData.referralCode;
+      if (!finalReferralCode || finalReferralCode === 'Code not available') {
+        finalReferralCode = `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
         
+        // Try to create the referral record
         try {
-          referralRecord = await storage.createReferral({
-            userId: user.id,
-            referralCode: referralCode,
+          await storage.createReferral({
+            userId: user._id || user.id,
+            referralCode: finalReferralCode,
             isCompleted: false
           });
-          console.log("✅ Created new referral record:", referralRecord);
+          console.log("✅ Created new referral with code:", finalReferralCode);
         } catch (createError) {
           console.error("❌ Error creating referral:", createError);
-          // If creation fails, still return the generated code
-          console.log("⚠️ Using fallback referral code:", referralCode);
         }
-      } else {
-        referralCode = referralRecord.referralCode;
-        console.log("✅ Found existing referral code:", referralCode);
       }
 
-      // Get referral count (how many people this user has referred)
-      const referralCount = await storage.getReferralCount(user.id);
+      // Get referral count
+      const referralCount = await storage.getReferralCount(user._id || user.id);
       const isEligibleForDiscount = referralCount >= 5;
       const hasClaimedDiscount = user.hasClaimedDiscount || false;
 
-      console.log("📊 Referral count:", referralCount);
-      console.log("🎯 Final referral code:", referralCode);
-
       const responseData = {
-        referralCode,
-        referralCount,
+        referralCode: finalReferralCode,
+        referralCount: referralCount,
         isEligibleForDiscount,
         hasClaimedDiscount,
       };
 
-      console.log("📤 Sending response:", responseData);
+      console.log("📤 Sending final response:", responseData);
       return res.status(200).json(responseData);
     } catch (error) {
       console.error("❌ Get referrals error:", error);
       
-      // Create a fallback response to prevent frontend errors
-      const fallbackCode = `REF-TEMP-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+      // Always return a valid JSON response even on error
+      const user = await storage.getUser(req.session.userId).catch(() => null);
+      const fallbackCode = user ? `REF-${user.uid}-${Math.random().toString(36).substr(2, 6).toUpperCase()}` : `REF-FALLBACK-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+      
       const fallbackResponse = {
         referralCode: fallbackCode,
         referralCount: 0,
