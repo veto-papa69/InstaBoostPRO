@@ -173,19 +173,37 @@ const loginLogSchema = new mongoose.Schema({
   }
 });
 
+// Referral Schema - UPDATED
 const referralSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
-  referralCode: { type: String, required: true, unique: true },
-  referredUserId: { type: String, default: null },
-  isCompleted: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  userId: { 
+    type: String, 
+    required: true,
+    index: true
+  },
+  referralCode: { 
+    type: String, 
+    required: true, 
+    unique: true 
+  },
+  referredUserId: { 
+    type: String, 
+    default: null,
+    index: true
+  },
+  isCompleted: { 
+    type: Boolean, 
+    default: false,
+    index: true
+  },
+  createdAt: { 
+    type: Date, 
+    default: Date.now 
+  }
 });
 
 // Create compound indexes for better performance and uniqueness
+referralSchema.index({ userId: 1, referredUserId: 1 }, { unique: true });
 referralSchema.index({ referralCode: 1 }, { unique: true });
-referralSchema.index({ userId: 1 });
-referralSchema.index({ referredUserId: 1 });
-referralSchema.index({ userId: 1, referredUserId: 1 });
 
 // Ensure referral code uniqueness
 referralSchema.pre('save', async function(next) {
