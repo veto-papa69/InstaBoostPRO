@@ -231,6 +231,18 @@ export async function connectMongoDB() {
       console.log('✅ MongoDB connected successfully');
       console.log(`📊 Database: ${mongoose.connection.name}`);
 
+      // Ensure all indexes are created
+      try {
+        await User.createIndexes();
+        await Referral.createIndexes();
+        await Order.createIndexes();
+        await Payment.createIndexes();
+        await Service.createIndexes();
+        console.log('✅ Database indexes created successfully');
+      } catch (indexError) {
+        console.log('⚠️ Index creation warning (this is normal):', indexError.message);
+      }
+
       // Initialize default services if collection is empty
       await initializeServices();
 
