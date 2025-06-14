@@ -5,9 +5,8 @@ import { useToast } from "../hooks/use-toast";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
-import { useNavigate } from "react-router-dom";
 import ServiceModal from "../components/service-modal";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 interface Service {
   id: string;
@@ -23,9 +22,9 @@ interface Service {
 export default function RewardServices() {
   const { isAuthenticated, user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [location, setLocation] = useLocation();
 
   // Check eligibility on mount
   const { data: referralData, isLoading: referralLoading } = useQuery({
@@ -45,14 +44,14 @@ export default function RewardServices() {
     if (referralData && (!referralData.isEligibleForDiscount || referralData.hasClaimed)) {
       toast({
         title: "Access Denied",
-        description: referralData.hasClaimed 
+        description: referralData.hasClaimed
           ? "You have already claimed your reward"
           : "You need 5 referrals to access reward services",
         variant: "destructive",
       });
-      navigate("/referrals");
+      setLocation("/referrals");
     }
-  }, [referralData, navigate, toast]);
+  }, [referralData, setLocation, toast]);
 
   // Fetch services with discount applied
   const { data: services, isLoading: servicesLoading } = useQuery({
@@ -111,7 +110,7 @@ export default function RewardServices() {
   };
 
   if (!isAuthenticated) {
-    navigate("/");
+    setLocation("/");
     return null;
   }
 
@@ -178,11 +177,11 @@ export default function RewardServices() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {(categoryServices as Service[]).map((service) => (
-                <Card 
+                <Card
                   key={service.id}
                   className="relative overflow-hidden transition-all duration-300 hover:scale-105 cursor-pointer border-2"
-                  style={{ 
-                    backgroundColor: 'var(--charcoal)', 
+                  style={{
+                    backgroundColor: 'var(--charcoal)',
                     borderColor: 'var(--gold)',
                   }}
                   onClick={() => setSelectedService(service)}
@@ -222,7 +221,7 @@ export default function RewardServices() {
                       </div>
 
                       {/* Order Button */}
-                      <Button 
+                      <Button
                         className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-black font-semibold"
                         onClick={(e) => {
                           e.stopPropagation();
