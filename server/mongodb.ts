@@ -176,21 +176,28 @@ const loginLogSchema = new mongoose.Schema({
 const referralSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   referralCode: { type: String, required: true, unique: true },
-  referredUserId: { type: String },
+  referredUserId: { type: String, default: null },
   isCompleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
-// Add indexes for better performance - only if not already defined
-if (!referralSchema.indexes().find(index => index.referralCode)) {
-  referralSchema.index({ referralCode: 1 });
-}
-if (!referralSchema.indexes().find(index => index.userId)) {
-  referralSchema.index({ userId: 1 });
-}
-if (!referralSchema.indexes().find(index => index.referredUserId)) {
-  referralSchema.index({ referredUserId: 1 });
-}
+// Create compound indexes for better performance and uniqueness
+referralSchema.index({ referralCode: 1 }, { unique: true });
+referralSchema.index({ userId: 1 });
+referralSchema.index({ referredUserId: 1 });
+referralSchema.index({ userId: 1, referredUserId: 1 });
+
+// Ensure referral code uniqueness
+referralSchema.pre('save', async function(next) {
+  if (this.isNew && this.referralCode) {
+    const existing = await this.constructor.findOne({ referralCode: this.referralCode });
+    if (existing) {
+      const timestamp = Date.now().toString(36).toUpperCase();
+      this.referralCode = `${this.referralCode}-${timestamp}`;
+    }
+  }
+  next();
+});
 
 const discountRewardSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
