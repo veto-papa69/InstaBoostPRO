@@ -389,13 +389,6 @@ export class MongoDBStorage implements IMongoStorage {
         totalEarnings: '0.00'
       };
 
-          // Get count of referred users - count all successful referrals where this user was the referrer
-      const referredCount = await Referral.countDocuments({
-        userId: userIdStr,
-        referredUserId: { $exists: true, $ne: null },
-        isCompleted: true
-      });
-
       console.log('📋 Final referral data:', result);
       return result;
     } catch (error) {
