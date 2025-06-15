@@ -380,12 +380,120 @@ export class MongoDBStorage implements IMongoStorage {
       const result = referral ? {
         id: referral._id ? referral._id.toString() : 'temp',
         referralCode: referral.referralCode,
+        referredCount: referredCount,g new referral code:', referralCode);
+
+          try {
+            const newReferral = new Referral({
+              userId: userIdStr,
+              referralCode,
+              isCompleted: false,
+              createdAt: new Date()
+            });
+            await newReferral.save();
+            referral = newReferral.toObject();
+            console.log('✅ New referral created successfully:', referral);
+          } catch (saveError) {
+            console.error('❌ Error saving new referral:', saveError);
+            // Return a basic structure even if save fails
+            referral = {
+              _id: 'temp',
+              userId: userIdStr,
+              referralCode,
+              isCompleted: false
+            };
+          }
+        }
+      }
+
+      // Get count of referred users - count all successful referrals where this user was the referrer
+      const referredCount = await Referral.countDocuments({
+        userId: userIdStr,
+        referredUserId: { $exists: true, $ne: null },
+        isCompleted: true
+      });
+
+      const result = referral ? {
+        id: referral._id ? referral._id.toString() : 'temp',
+        referralCode: referral.referralCode,
         referredCount: referredCount,
         totalEarnings: (referredCount * 5).toFixed(2) // $5 per referral
       } : {
         id: '',
         referralCode: 'Code not available',
         referredCount: 0,
+        totalEarnings: '0.00'
+      };
+
+      console.log('📋 Final referral data:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Error getting user referral data:', error);
+      return {
+        id: '',
+        referralCode: 'Code not available',
+        referredCount: 0,
+        totalEarnings: '0.00'
+      };
+    }
+  }
+
+  async getReferralCount(userId: string): Promise<number> {
+    try {
+      const userIdStr = userId.toString();
+      
+      // Count all successful referrals where this user was the referrer
+      const count = await Referral.countDocuments({
+        userId: userIdStr,
+        referredUserId: { $exists: true, $ne: null },
+        isCompleted: true
+      });
+
+      console.log(`📊 Referral count for user ${userId}:`, count);
+      return count;
+    } catch (error) {
+      console.error('❌ Error getting referral count:', error);
+      return 0;
+    }
+  }
+
+  async createReferral(data: any) {
+    try {
+      console.log('🎯 Creating new referral:', data);
+
+      const referral = new Referral({
+        userId: data.userId.toString(),
+        referralCode: data.referralCode,
+        isCompleted: data.isCompleted || false,
+        createdAt: new Date()
+      });
+
+      await referral.save();
+      console.log('✅ Referral created successfully');
+
+      return {
+        id: referral._id.toString(),
+        userId: referral.userId,
+        referralCode: referral.referralCode,
+        isCompleted: referral.isCompleted
+      };
+    } catch (error) {
+      console.error('❌ Error creating referral:', error);
+      throw error;
+    }
+  }
+
+  async updateUserDiscountStatus(userId: string, hasClaimedDiscount: boolean): Promise<void> {
+    try {
+      await User.findByIdAndUpdate(userId, { hasClaimedDiscount });
+      console.log(`✅ Updated discount status for user ${userId} to ${hasClaimedDiscount}`);
+    } catch (error) {
+      console.error('❌ Error updating user discount status:', error);
+      throw error;
+    }
+  }
+}
+
+export const mongoStorage = new MongoDBStorage() 0,
         totalEarnings: '0.00'
       };
 
@@ -469,7 +577,10 @@ export class MongoDBStorage implements IMongoStorage {
 
       console.log('✅ Referral record created successfully');
     } catch (error) {
-      console.error('Error creating referral record:', error);
+      console.error('❌ Error creating referral record:', error);
+      throw error;
+    }
+  } creating referral record:', error);
       throw error;
     }
   }
