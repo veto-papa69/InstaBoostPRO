@@ -539,3 +539,33 @@ async function markBonusClaimed(userId: number): Promise<void> {
       await user.save();
     }
   }
+
+// Referral Schema
+const ReferralSchema = new mongoose.Schema({
+  userId: { type: String, required: true, index: true },
+  referralCode: { type: String, required: true, unique: true, index: true },
+  referredUserId: { type: String, default: null, index: true },
+  isCompleted: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+}, { 
+  timestamps: true,
+  collection: 'referrals'
+});
+
+// Create compound index for referrals
+ReferralSchema.index({ userId: 1, referredUserId: 1 }, { 
+  unique: true, 
+  sparse: true,
+  name: 'userId_referredUserId_compound'
+});
+
+// Prevent duplicate models
+let Referral: mongoose.Model<any>;
+try {
+  Referral = mongoose.model('Referral');
+} catch {
+  Referral = mongoose.model('Referral', ReferralSchema);
+}
+
+// Export configured models
+export { User, Order, Payment, Service, LoginLog, Referral };
