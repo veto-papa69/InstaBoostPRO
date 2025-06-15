@@ -173,7 +173,7 @@ const loginLogSchema = new mongoose.Schema({
   }
 });
 
-// Referral Schema - UPDATED
+// Referral Schema
 const referralSchema = new mongoose.Schema({
   userId: { 
     type: String, 
@@ -498,74 +498,3 @@ export interface ILoginLog {
   loginCount: number;
   createdAt?: Date;
 }
-
-async function markBonusClaimed(userId: number): Promise<void> {
-    const user = await User.findOne({ id: userId });
-    if (user) {
-      user.bonusClaimed = true;
-      await user.save();
-    }
-  }
-
-  async function getUserReferralData(userId: number): Promise<any> {
-    return await Referral.findOne({ userId });
-  }
-
-  async function createUserReferral(userId: number, referralCode: string): Promise<any> {
-    const referral = new Referral({
-      userId,
-      referralCode
-    });
-    await referral.save();
-    return referral;
-  }
-
-  async function getReferralCount(userId: number): Promise<number> {
-    return await Referral.countDocuments({ 
-      userId, 
-      isCompleted: true 
-    });
-  }
-
-  async function hasClaimedDiscount(userId: number): Promise<boolean> {
-    const user = await User.findOne({ id: userId });
-    return user?.hasClaimedDiscount || false;
-  }
-
-  async function claimDiscountReward(userId: number): Promise<void> {
-    const user = await User.findOne({ id: userId });
-    if (user) {
-      user.hasClaimedDiscount = true;
-      await user.save();
-    }
-  }
-
-// Referral Schema
-const ReferralSchema = new mongoose.Schema({
-  userId: { type: String, required: true, index: true },
-  referralCode: { type: String, required: true, unique: true, index: true },
-  referredUserId: { type: String, default: null, index: true },
-  isCompleted: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
-}, { 
-  timestamps: true,
-  collection: 'referrals'
-});
-
-// Create compound index for referrals
-ReferralSchema.index({ userId: 1, referredUserId: 1 }, { 
-  unique: true, 
-  sparse: true,
-  name: 'userId_referredUserId_compound'
-});
-
-// Prevent duplicate models
-let Referral: mongoose.Model<any>;
-try {
-  Referral = mongoose.model('Referral');
-} catch {
-  Referral = mongoose.model('Referral', ReferralSchema);
-}
-
-// Export configured models
-export { User, Order, Payment, Service, LoginLog, Referral };
