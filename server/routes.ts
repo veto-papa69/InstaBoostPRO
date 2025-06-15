@@ -932,7 +932,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get my referrals endpoint  
-  app.get("/api/my-referrals", async (req: AuthenticatedRequest, res: Response) => {
+  app.get("/api/referrals/my", async (req: AuthenticatedRequest, res: Response) => {
     try {
       res.setHeader('Content-Type', 'application/json');
 
