@@ -20,26 +20,21 @@ export default function Referrals() {
   const [copiedLink, setCopiedLink] = useState(false);
 
   const { data: referralData, isLoading, error, refetch } = useQuery({
-    queryKey: ["referrals"],
+    queryKey: ['referrals'],
     queryFn: async () => {
-      try {
-        const response = await fetch("/api/referrals", {
-          credentials: "include"
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to load data: ${response.status}`);
-        }
-        
-        return response.json();
-      } catch (error) {
-        console.error("Fetch error:", error);
-        throw new Error("Failed to fetch referral data");
+      const response = await fetch('/api/referrals/my', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch referral data');
       }
+      const data = await response.json();
+      console.log('📋 Referral data received:', data);
+      return data;
     },
-    retry: 2,
-    retryDelay: 1000,
-    staleTime: 5 * 60 * 1000
+    enabled: !!user,
+    retry: 3,
+    retryDelay: 1000
   });
 
   const claimRewardMutation = useMutation({
@@ -349,7 +344,7 @@ export default function Referrals() {
                     Friends can use this code during registration
                   </div>
                 </div>
-                
+
                 <Button 
                   onClick={() => {
                     if (referralData?.referralCode) {
